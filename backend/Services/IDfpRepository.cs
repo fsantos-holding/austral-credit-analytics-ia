@@ -26,4 +26,12 @@ public interface IDfpRepository
     /// </summary>
     Task<IReadOnlyList<DfpImportacaoHistorico>> GetImportacoesAsync(
         string? tipo, int? ano, int limite, CancellationToken ct = default);
+
+    /// <summary>
+    /// Lista as companhias distintas que possuem DRE importada (para o seletor de
+    /// companhia da tela de leitura de DRE). Filtro opcional por <paramref name="busca"/>
+    /// (razao social ou CNPJ) e limite de resultados.
+    /// </summary>
+    Task<IReadOnlyList<DfpEmpresaResumo>> GetEmpresasAsync(
+        string? busca, int limite, CancellationToken ct = default);
 }

@@ -68,6 +68,7 @@ O passo de build copia automaticamente o `index.html` da raiz do repositório pa
 | POST   | `/api/ia/config/test`             | Valida a chave do provedor ativo. **Somente Gestor.**           |
 | GET    | `/api/dfp/tipos`                  | Demonstrações DFP suportadas (`tipo`, `tabela`, `descrição`).    |
 | POST   | `/api/dfp/importar/{tipo}`        | Importa um CSV da CVM (campo multipart `arquivo`) para a demonstração. |
+| GET    | `/api/dfp/empresas`               | Companhias com DRE importada. Filtros: `busca` (razão social/CNPJ), `limite`. |
 | GET    | `/api/dfp/{cnpj}/estrutura`       | Mapa da estrutura por CNPJ: documentos + contagem por demonstração. |
 | GET    | `/api/dfp/{cnpj}/contas`          | Contas consolidadas do CNPJ. Filtros: `tipo`, `dtRefer` (yyyyMMdd), `ordem`. |
 

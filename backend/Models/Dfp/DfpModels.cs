@@ -283,25 +283,87 @@ public sealed class DfpEstruturaResumo
 /// <summary>Linha de conta consolidada de qualquer demonstracao (mapeia dfp.vw_Conta).</summary>
 public sealed class DfpConta
 {
+    [JsonPropertyName("tipoDem")]
     public string TIPO_DEM { get; set; } = string.Empty;
+
+    [JsonPropertyName("cnpj")]
     public string CNPJ_CIA { get; set; } = string.Empty;
+
+    [JsonPropertyName("cdCvm")]
     public string? CD_CVM { get; set; }
+
+    [JsonPropertyName("denominacao")]
     public string? DENOM_CIA { get; set; }
+
+    [JsonPropertyName("dtRefer")]
     public DateTime DT_REFER { get; set; }
+
+    [JsonPropertyName("versao")]
     public short VERSAO { get; set; }
+
+    [JsonPropertyName("grupoDfp")]
     public string? GRUPO_DFP { get; set; }
+
+    [JsonPropertyName("conjunto")]
     public string? Conjunto { get; set; }
+
+    [JsonPropertyName("ano")]
     public int? Ano { get; set; }
+
+    [JsonPropertyName("moeda")]
     public string? MOEDA { get; set; }
+
+    [JsonPropertyName("escalaMoeda")]
     public string? ESCALA_MOEDA { get; set; }
+
+    [JsonPropertyName("ordemExerc")]
     public string? ORDEM_EXERC { get; set; }
+
+    [JsonPropertyName("dtIniExerc")]
     public DateTime? DT_INI_EXERC { get; set; }
+
+    [JsonPropertyName("dtFimExerc")]
     public DateTime? DT_FIM_EXERC { get; set; }
+
+    [JsonPropertyName("colunaDf")]
     public string? COLUNA_DF { get; set; }
+
+    [JsonPropertyName("cdConta")]
     public string CD_CONTA { get; set; } = string.Empty;
+
+    [JsonPropertyName("dsConta")]
     public string? DS_CONTA { get; set; }
+
+    [JsonPropertyName("vlConta")]
     public decimal? VL_CONTA { get; set; }
+
+    [JsonPropertyName("stContaFixa")]
     public string? ST_CONTA_FIXA { get; set; }
+}
+
+/// <summary>
+/// Resumo de uma companhia que possui DRE importada (para o seletor de companhia da
+/// tela de leitura de DRE). Agrega por <c>CnpjNum</c> sobre dfp.Dre.
+/// </summary>
+public sealed class DfpEmpresaResumo
+{
+    [JsonPropertyName("cnpjNum")]
+    public string CnpjNum { get; set; } = string.Empty;
+
+    [JsonPropertyName("cnpj")]
+    public string? CNPJ_CIA { get; set; }
+
+    [JsonPropertyName("cdCvm")]
+    public string? CD_CVM { get; set; }
+
+    [JsonPropertyName("denominacao")]
+    public string? DENOM_CIA { get; set; }
+
+    [JsonPropertyName("ultimoAno")]
+    public short? UltimoAno { get; set; }
+
+    [JsonPropertyName("qtdAnos")]
+    public int QtdAnos { get; set; }
 }
 
 /// <summary>Linha do ledger de importacoes DFP (mapeia dfp.Importacao).</summary>

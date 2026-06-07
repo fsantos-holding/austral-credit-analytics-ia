@@ -99,6 +99,17 @@ public class DfpController : ControllerBase
         return Ok(new { message = "Cancelamento solicitado." });
     }
 
+    /// <summary>
+    /// Lista companhias com DRE importada para o seletor de companhia. Filtros opcionais:
+    /// <c>busca</c> (razao social ou CNPJ) e <c>limite</c> de resultados (padrao 50).
+    /// </summary>
+    [HttpGet("empresas")]
+    public Task<IActionResult> Empresas(
+        [FromQuery] string? busca,
+        [FromQuery] int limite,
+        CancellationToken ct)
+        => Run(async () => Ok(await _repository.GetEmpresasAsync(busca, limite <= 0 ? 50 : limite, ct)), ct);
+
     /// <summary>Mapa da estrutura disponivel para um CNPJ (documentos + contagem por demonstracao).</summary>
     [HttpGet("{cnpj}/estrutura")]
     public Task<IActionResult> Estrutura(string cnpj, CancellationToken ct)

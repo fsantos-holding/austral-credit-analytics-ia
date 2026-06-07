@@ -104,6 +104,32 @@ public class DfpRepository : IDfpRepository
         return rows.ToList();
     }
 
+    public async Task<IReadOnlyList<DfpEmpresaResumo>> GetEmpresasAsync(
+        string? busca, int limite, CancellationToken ct = default)
+    {
+        var top = Math.Clamp(limite, 1, 500);
+        var buscaFiltro = string.IsNullOrWhiteSpace(busca) ? null : busca.Trim();
+
+        var sql = $"""
+            SELECT TOP ({top})
+                   CnpjNum,
+                   MIN(CNPJ_CIA)            AS CNPJ_CIA,
+                   MIN(CD_CVM)              AS CD_CVM,
+                   MAX(DENOM_CIA)           AS DENOM_CIA,
+                   MAX(Ano)                 AS UltimoAno,
+                   COUNT(DISTINCT Ano)      AS QtdAnos
+            FROM dfp.Dre
+            WHERE (@busca IS NULL OR DENOM_CIA LIKE '%' + @busca + '%' OR CnpjNum LIKE '%' + @busca + '%')
+            GROUP BY CnpjNum
+            ORDER BY DENOM_CIA;
+            """;
+
+        await using var connection = _factory.CreateFromSaved();
+        var rows = await connection.QueryAsync<DfpEmpresaResumo>(new CommandDefinition(
+            sql, new { busca = buscaFiltro }, cancellationToken: ct));
+        return rows.ToList();
+    }
+
     /// <summary>Mantem apenas os digitos do CNPJ (ex.: 00.000.000/0001-00 -> 00000000000100).</summary>
     private static string NormalizarCnpj(string? cnpj)
         => string.IsNullOrWhiteSpace(cnpj)
