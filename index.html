@@ -1798,8 +1798,8 @@ function dreSliceVersao(rows, conjunto, ano) {
   return {
     versao: maxV,
     meta: f[0],
-    ultimo: f.filter(r => (r.ordemExerc || '').toUpperCase() === 'ULTIMO'),
-    penultimo: f.filter(r => (r.ordemExerc || '').toUpperCase() === 'PENULTIMO'),
+    ultimo: f.filter(r => dreNorm(r.ordemExerc) === 'ultimo'),
+    penultimo: f.filter(r => dreNorm(r.ordemExerc) === 'penultimo'),
   };
 }
 
