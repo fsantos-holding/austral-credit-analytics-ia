@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Austral">
+  <defs>
+    <linearGradient id="auralDiag" gradientUnits="userSpaceOnUse" x1="32" y1="0" x2="64" y2="32">
+      <stop offset="0%" stop-color="#4AC5BE"/>
+      <stop offset="100%" stop-color="#1B2A5E"/>
+    </linearGradient>
+  </defs>
+  <!-- quadrante superior esquerdo: turquesa -->
+  <rect x="0" y="0" width="32" height="32" fill="#4AC5BE"/>
+  <!-- quadrante inferior esquerdo: branco -->
+  <rect x="0" y="32" width="32" height="32" fill="#FFFFFF"/>
+  <!-- quadrante inferior direito: turquesa -->
+  <rect x="32" y="32" width="32" height="32" fill="#4AC5BE"/>
+  <!-- quadrante superior direito: navy com triangulo em gradiente na diagonal -->
+  <rect x="32" y="0" width="32" height="32" fill="#1B2A5E"/>
+  <polygon points="32,0 64,0 32,32" fill="url(#auralDiag)"/>
+</svg>

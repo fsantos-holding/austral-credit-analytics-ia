@@ -1,0 +1,46 @@
+# ---- .NET build output ----
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+build/
+publish/
+*.dll
+*.exe
+*.pdb
+
+# ---- Segredos / Data Protection (chaves e config cifrada) ----
+App_Data/
+*.dat
+
+# ---- .NET / Visual Studio user files ----
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.csproj.user
+
+# ---- Rider / VS Code ----
+.idea/
+.vscode/
+
+# ---- Test / coverage ----
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+
+# ---- Logs e temporários ----
+*.log
+*.tmp
+*.cache
+
+# ---- Node (caso haja tooling de frontend) ----
+node_modules/
+
+# ---- SO ----
+.DS_Store
+Thumbs.db

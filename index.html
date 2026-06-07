@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Austral — Credit Analytics IA</title>
+<link rel="icon" type="image/svg+xml" href="assets/austral-logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  :root {
+    --accent: #00C9BC;
+    --accent-light: #3FE3D6;
+    --accent-pale: #E4FBF8;
+    --accent-ink: #057E76;
+    --green: #8FC73E;
+    --green-light: #A2D460;
+    --green-ink: #4F7A12;
+    --navy: #001E61;
+    --navy-mid: #0A2A6B;
+    --navy-light: #15399A;
+    --navy-deep: #00123F;
+    --surface: #FFFFFF;
+    --surface-2: #F6F8FB;
+    --border: rgba(0,30,97,0.10);
+    --border-strong: rgba(0,30,97,0.18);
+    --text-primary: #08163D;
+    --text-secondary: #475173;
+    --text-muted: #8893AB;
+    --danger: #C53030;
+    --danger-bg: #FFF5F5;
+    --warning: #B45309;
+    --warning-bg: #FFFAF0;
+    --success: var(--green-ink);
+    --success-bg: #F3F9E6;
+    --info: #1E5BB8;
+    --info-bg: #EBF3FF;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,30,97,0.08), 0 1px 2px rgba(0,30,97,0.05);
+    --shadow-md: 0 4px 16px rgba(0,30,97,0.12), 0 2px 6px rgba(0,30,97,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #EEF0F4; color: var(--text-primary); font-size: 14px; min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(0,201,188,0.18); }
+  .topbar-brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo { display: block; width: 34px; height: 34px; border-radius: 8px; background: #FFFFFF; padding: 3px; box-shadow: 0 2px 8px rgba(0,201,188,0.30); }
+  .brand-name { color: #FFFFFF; font-weight: 500; font-size: 15px; letter-spacing: 0.3px; }
+  .brand-sub { color: var(--accent-light); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-date { color: rgba(255,255,255,0.5); font-size: 12px; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.8); font-size: 13px; }
+  .avatar-sm { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--navy); }
+  .topbar-user-perfil { font-size: 10px; color: var(--accent-light); letter-spacing: 0.6px; text-transform: uppercase; }
+  .topbar-logout { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; cursor: pointer; transition: background 0.15s; }
+  .topbar-logout:hover { background: rgba(255,255,255,0.16); }
+
+  /* LAYOUT */
+  .layout { display: flex; min-height: calc(100vh - 60px); }
+  .sidebar { width: 230px; background: linear-gradient(180deg, var(--navy-mid) 0%, var(--navy-deep) 100%); padding: 20px 0 40px; flex-shrink: 0; }
+  .nav-section { padding: 0 12px; margin-bottom: 24px; }
+  .nav-label { font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin-bottom: 8px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.55); font-size: 13px; transition: all 0.15s; margin-bottom: 2px; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(0,201,188,0.18); color: var(--accent-light); }
+  .nav-item i { font-size: 17px; flex-shrink: 0; }
+  .nav-item.hidden { display: none; }
+
+  /* MAIN */
+  .main { flex: 1; padding: 28px; overflow: hidden; }
+  .view { display: none; }
+  .view.active { display: block; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+  .page-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+  .page-actions { display: flex; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--radius); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border-strong); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-gold { background: var(--accent); color: var(--navy); font-weight: 600; }
+  .btn-gold:hover { background: var(--accent-light); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* KPI CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .kpi-card { background: var(--surface); border-radius: var(--radius-lg); padding: 18px 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .kpi-label { font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .kpi-value { font-size: 24px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+  .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .kpi-success .kpi-value { color: var(--success); }
+  .kpi-danger .kpi-value { color: var(--danger); }
+  .kpi-gold .kpi-value { color: var(--accent-ink); }
+
+  /* FILTERS */
+  .filters-bar { background: var(--surface); border-radius: var(--radius-lg); padding: 14px 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; box-shadow: var(--shadow); }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; flex: 1; min-width: 200px; }
+  .search-box input { border: none; background: transparent; font-family: inherit; font-size: 13px; color: var(--text-primary); outline: none; width: 100%; }
+  .search-box i { color: var(--text-muted); font-size: 16px; }
+  .field-inline { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
+  .field-inline input, .filter-select { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--text-secondary); background: var(--surface-2); outline: none; }
+  .filter-select { cursor: pointer; }
+
+  /* TABLE */
+  .table-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+  .table-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .table-title { font-size: 14px; font-weight: 600; }
+  .table-count { font-size: 12px; color: var(--text-muted); }
+  .table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); background: var(--surface-2); border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: #F5F6FA; }
+  tbody tr:last-child { border-bottom: none; }
+  td { padding: 10px 14px; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
+  .td-company { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+  .valor-cell { font-family: 'DM Mono', monospace; font-size: 12.5px; color: var(--text-secondary); }
+  .cell-mono { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+  .badge-warning { background: var(--warning-bg); color: var(--warning); }
+  .badge-info { background: var(--info-bg); color: var(--info); }
+  .badge-success { background: var(--success-bg); color: var(--success); }
+  .badge-neutral { background: var(--surface-2); color: var(--text-secondary); }
+  .score-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; padding: 3px 8px; border-radius: 7px; font-family: 'DM Mono', monospace; font-weight: 600; font-size: 12px; }
+  .score-hi { background: var(--success-bg); color: var(--success); }
+  .score-mid { background: var(--warning-bg); color: var(--warning); }
+  .score-lo { background: var(--danger-bg); color: var(--danger); }
+  .table-state td { padding: 48px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
+  .table-state .state-icon { font-size: 30px; display: block; margin-bottom: 10px; opacity: 0.7; }
+  .table-state.error td { color: var(--danger); }
+
+  /* CARD / FORM (config, usuarios) */
+  .card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; max-width: 760px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .card-title i { color: var(--accent-ink); }
+  .card-sub { font-size: 12.5px; color: var(--text-muted); margin-bottom: 18px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field.full { grid-column: 1 / -1; }
+  label { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-secondary); }
+  input[type=text], input[type=password], input[type=number], input[type=email], input[type=date], select, textarea { padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-family: inherit; font-size: 13.5px; color: var(--text-primary); background: var(--surface); outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,201,188,0.15); }
+  textarea { resize: vertical; min-height: 70px; }
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+  .check-row input { width: 16px; height: 16px; accent-color: var(--navy); }
+  .form-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+  /* STATUS STEPS (config test) */
+  .test-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
+  .test-step { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 4px; background: var(--surface-2); }
+  .test-step .ts-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .test-step .ts-msg { font-size: 12.5px; color: var(--text-primary); }
+  .test-step .ts-ms { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .test-step.on { border-color: rgba(79,122,18,0.4); background: var(--success-bg); }
+  .test-step.off { border-color: rgba(197,48,48,0.35); background: var(--danger-bg); }
+  .dot-state { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); }
+  .test-step.on .dot-state { background: var(--success); }
+  .test-step.off .dot-state { background: var(--danger); }
+  .test-summary { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: var(--radius); }
+  .test-summary.ok { background: var(--success-bg); color: var(--success); }
+  .test-summary.fail { background: var(--danger-bg); color: var(--danger); }
+
+  /* IA RESULT */
+  .ia-result { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; margin-top: 16px; background: var(--surface-2); display: none; }
+  .ia-result.show { display: block; }
+  .ia-result-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .ia-score { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 600; }
+  .ia-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .ia-metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .ia-metric .m-l { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
+  .ia-metric .m-v { font-size: 16px; font-weight: 600; margin-top: 4px; }
+  .ia-list { margin: 6px 0 12px 18px; font-size: 13px; color: var(--text-secondary); }
+  .ia-list li { margin-bottom: 3px; }
+
+  /* AUTH GATE (login) */
+  .auth-gate { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); padding: 24px; }
+  .auth-gate.open { display: flex; }
+  .auth-card { width: 410px; max-width: 94vw; background: var(--surface); border-radius: 18px; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5); padding: 36px 34px; }
+  .auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .auth-brand img { width: 44px; height: 44px; border-radius: 9px; background: #fff; padding: 4px; box-shadow: 0 2px 8px rgba(0,201,188,0.25); }
+  .auth-title { font-size: 19px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+  .auth-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 1.4px; text-transform: uppercase; margin-top: 2px; }
+  .auth-form { display: flex; flex-direction: column; gap: 16px; }
+  .auth-remember { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; user-select: none; }
+  .auth-remember input { width: 16px; height: 16px; accent-color: var(--navy); cursor: pointer; }
+  .auth-error { display: none; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(197,48,48,0.25); border-radius: var(--radius); padding: 10px 12px; font-size: 12.5px; }
+  .auth-error.show { display: block; }
+  .auth-btn { width: 100%; justify-content: center; padding: 11px; font-size: 14px; }
+  .auth-hint { margin-top: 20px; font-size: 11.5px; color: var(--text-muted); text-align: center; line-height: 1.55; }
+
+  /* OVERLAY / MODAL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(13,27,42,0.6); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 18px; width: 460px; max-width: 96vw; box-shadow: 0 30px 80px -20px rgba(13,27,42,0.45); padding: 26px 28px; }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .modal p.sub { font-size: 12.5px; color: var(--text-muted); margin-bottom: 18px; }
+  .modal .form-grid { grid-template-columns: 1fr; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 28px; right: 28px; background: var(--navy); color: #fff; padding: 12px 20px; border-radius: var(--radius-lg); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); z-index: 600; display: flex; align-items: center; gap: 10px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .toast.error { background: var(--danger); }
+  .toast i { color: var(--accent-light); font-size: 18px; }
+  .toast.error i { color: #fff; }
+
+  /* IMPORTAÇÃO DE MODELOS */
+  .import-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; }
+  .import-step-label { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px; }
+  .import-step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; font-weight: 600; }
+
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .model-empty { grid-column: 1 / -1; padding: 32px; text-align: center; color: var(--text-muted); font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .model-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 14px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; text-align: left; }
+  .model-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .model-card .mc-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-pale); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .model-card .mc-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+  .model-card .mc-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
+  .model-card .mc-check { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; display: none; align-items: center; justify-content: center; font-size: 13px; }
+  .model-card.selected { border-color: var(--accent); background: var(--accent-pale); box-shadow: 0 0 0 3px rgba(0,201,188,0.18); }
+  .model-card.selected .mc-icon { background: var(--accent); color: #fff; }
+  .model-card.selected .mc-check { display: flex; }
+
+  .dropzone { position: relative; border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); background: var(--surface); padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .dropzone:hover { border-color: var(--accent); background: var(--surface-2); }
+  .dropzone.dragover { border-color: var(--accent); background: var(--accent-pale); box-shadow: 0 0 0 3px rgba(0,201,188,0.18); }
+  .dropzone .dz-icon { font-size: 38px; color: var(--accent-ink); }
+  .dropzone .dz-title { font-size: 13.5px; color: var(--text-primary); margin-top: 8px; }
+  .dropzone .dz-link { color: var(--accent-ink); font-weight: 600; }
+  .dropzone .dz-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+  .dropzone .dz-file { display: none; margin-top: 14px; padding: 10px 14px; background: var(--success-bg); color: var(--success); border-radius: var(--radius); font-size: 12.5px; font-weight: 500; align-items: center; justify-content: center; gap: 8px; }
+  .dropzone.has-file { border-style: solid; border-color: rgba(79,122,18,0.35); }
+  .dropzone.has-file .dz-file { display: flex; }
+  .import-actions { display: flex; gap: 10px; margin-top: 16px; }
+
+  .import-progress { display: none; margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; }
+  .import-progress.show { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .ip-head { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+  .ip-ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+  .ip-ring svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+  .ip-ring circle { fill: none; stroke-width: 10; }
+  .ip-ring-track { stroke: var(--surface-2); }
+  .ip-ring-fill { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 326.7; stroke-dashoffset: 326.7; transition: stroke-dashoffset 0.4s ease, stroke 0.3s; }
+  .ip-ring-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+  .ip-info { flex: 1; min-width: 260px; }
+  .ip-status { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .ip-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .ip-model { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; }
+  .ip-bar { height: 8px; background: var(--surface-2); border-radius: 20px; overflow: hidden; margin-bottom: 14px; }
+  .ip-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 20px; transition: width 0.4s ease, background 0.3s; }
+  .ip-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .ip-metric { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .ip-metric .ip-m-l { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+  .ip-metric .ip-m-v { font-size: 15px; font-weight: 600; color: var(--text-primary); font-family: 'DM Mono', monospace; }
+  .ip-message { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px; }
+  .ip-actions { display: flex; gap: 10px; }
+  .import-hidden { display: none !important; }
+  .import-progress.done .ip-dot { animation: none; background: var(--success); }
+  .import-progress.done .ip-ring-fill { stroke: var(--green); }
+  .import-progress.done .ip-bar-fill { background: linear-gradient(90deg, var(--green), var(--green-light)); }
+  .import-progress.failed .ip-dot { animation: none; background: var(--danger); }
+  .import-progress.failed .ip-ring-fill { stroke: var(--danger); }
+  .import-progress.failed .ip-bar-fill { background: var(--danger); }
+  .import-progress.canceled .ip-dot { animation: none; background: var(--warning); }
+  .import-progress.canceled .ip-ring-fill { stroke: var(--warning); }
+  .import-progress.canceled .ip-bar-fill { background: var(--warning); }
+  .ip-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary); white-space: nowrap; }
+  .badge i { font-size: 13px; }
+  .badge.b-con { background: rgba(0,201,188,0.14); border-color: rgba(0,201,188,0.4); color: var(--accent-light); }
+  .badge.b-ind { background: rgba(120,120,255,0.14); border-color: rgba(120,120,255,0.4); color: #9aa0ff; }
+  .badge.b-mis, .badge.b-warn { background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.45); color: var(--warning); }
+  .badge.b-na { opacity: 0.8; }
+  .badge.b-ano { font-family: 'DM Mono', monospace; }
+  @media (max-width: 920px) { .import-layout { grid-template-columns: 1fr; } }
+
+  /* Histórico de importações */
+  .hist-card { margin-top: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 20px 22px; }
+  .hist-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .hist-title { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; color: var(--text-primary); }
+  .hist-table-wrap { overflow-x: auto; }
+  .hist-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .hist-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .hist-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: middle; white-space: nowrap; }
+  .hist-table tr:last-child td { border-bottom: none; }
+  .hist-table .num { font-family: 'DM Mono', monospace; text-align: right; }
+  .hist-status { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+  .hist-status.s-Concluido { color: var(--green); }
+  .hist-status.s-Falha { color: var(--danger); }
+  .hist-status.s-Cancelado { color: var(--warning); }
+  .hist-status.s-Processando { color: var(--accent-light); }
+  .hist-empty { text-align: center; color: var(--text-muted); padding: 22px; font-size: 13px; }
+
+  .spin { animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .app-hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="assets/austral-logo.svg" alt="Austral">
+      <div>
+        <div class="auth-title">Credit Analytics IA</div>
+        <div class="auth-sub">Austral Seguradora</div>
+      </div>
+    </div>
+    <form class="auth-form" id="login-form" autocomplete="on">
+      <div class="auth-error" id="login-error"></div>
+      <div class="form-field">
+        <label for="login-user">Usuário</label>
+        <input type="text" id="login-user" name="username" autocomplete="username" required>
+      </div>
+      <div class="form-field">
+        <label for="login-pass">Senha</label>
+        <input type="password" id="login-pass" name="password" autocomplete="current-password" required>
+      </div>
+      <label class="auth-remember"><input type="checkbox" id="login-remember"> Lembrar meu login neste navegador</label>
+      <button type="submit" class="btn btn-primary auth-btn" id="login-btn">Entrar</button>
+    </form>
+    <div class="auth-hint" id="login-hint">Primeiro acesso: configure a conexão com o banco para liberar o login.</div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="app-hidden">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img class="brand-logo" src="assets/austral-logo.svg" alt="Austral">
+      <div>
+        <div class="brand-name">Credit Analytics IA</div>
+        <div class="brand-sub">Austral Seguradora</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <div class="topbar-user">
+        <div class="avatar-sm" id="user-avatar">--</div>
+        <div>
+          <div id="user-name">—</div>
+          <div class="topbar-user-perfil" id="user-perfil">—</div>
+        </div>
+      </div>
+      <button class="topbar-logout" id="btn-logout" title="Sair"><i class="ti ti-logout"></i></button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Análise</div>
+        <div class="nav-item active" data-view="credito"><i class="ti ti-chart-histogram"></i><span>Análise de Crédito</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Dados</div>
+        <div class="nav-item" data-view="importacao"><i class="ti ti-database-import"></i><span>Importação de Modelos</span></div>
+      </div>
+      <div class="nav-section" id="nav-admin">
+        <div class="nav-label">Administração</div>
+        <div class="nav-item" data-view="config"><i class="ti ti-settings"></i><span>Configurações</span></div>
+        <div class="nav-item" data-view="usuarios"><i class="ti ti-users"></i><span>Usuários</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- ===== CRÉDITO ===== -->
+      <section class="view active" id="view-credito">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Análise de Crédito</div>
+            <div class="page-subtitle">Painel de risco e decisões de crédito dos tomadores.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="btn-export"><i class="ti ti-download"></i> Exportar CSV</button>
+            <button class="btn btn-primary" id="btn-reload"><i class="ti ti-refresh"></i> Atualizar</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" id="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label"><i class="ti ti-list-details"></i> Total de análises</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">no período</div></div>
+          <div class="kpi-card kpi-success"><div class="kpi-label"><i class="ti ti-circle-check"></i> Aprovadas</div><div class="kpi-value" id="kpi-aprovadas">—</div><div class="kpi-sub" id="kpi-aprovadas-sub">—</div></div>
+          <div class="kpi-card kpi-danger"><div class="kpi-label"><i class="ti ti-alert-triangle"></i> Reprovadas / Em análise</div><div class="kpi-value" id="kpi-pendentes">—</div><div class="kpi-sub" id="kpi-pendentes-sub">—</div></div>
+          <div class="kpi-card kpi-gold"><div class="kpi-label"><i class="ti ti-cash"></i> Valor total solicitado</div><div class="kpi-value" id="kpi-valor">—</div><div class="kpi-sub">soma do período</div></div>
+          <div class="kpi-card"><div class="kpi-label"><i class="ti ti-gauge"></i> Score médio</div><div class="kpi-value" id="kpi-score">—</div><div class="kpi-sub">0–1000</div></div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input type="text" id="filtro-busca" placeholder="Buscar por tomador, documento, analista...">
+          </div>
+          <div class="field-inline"><label style="text-transform:none;letter-spacing:0;font-weight:500;">De</label><input type="date" id="filtro-de"></div>
+          <div class="field-inline"><label style="text-transform:none;letter-spacing:0;font-weight:500;">Até</label><input type="date" id="filtro-ate"></div>
+          <select class="filter-select" id="filtro-status">
+            <option value="">Todos os status</option>
+            <option value="APROVADO">Aprovado</option>
+            <option value="EM_ANALISE">Em análise</option>
+            <option value="REPROVADO">Reprovado</option>
+          </select>
+          <button class="btn btn-primary" id="btn-filtrar"><i class="ti ti-filter"></i> Filtrar</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">Análises de crédito</div>
+            <div class="table-count" id="table-count">—</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th><th>Tomador</th><th>Documento</th><th>Valor solicitado</th>
+                  <th>Score</th><th>Rating</th><th>Risco</th><th>Status</th><th>Analista</th>
+                </tr>
+              </thead>
+              <tbody id="credito-body">
+                <tr class="table-state"><td colspan="9"><i class="ti ti-loader-2 spin state-icon"></i>Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== IMPORTAÇÃO DE MODELOS ===== -->
+      <section class="view" id="view-importacao">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Importação de Modelos</div>
+            <div class="page-subtitle">Carregue os CSVs da CVM (open data DFP) para as demonstrações padronizadas.</div>
+          </div>
+        </div>
+
+        <div class="import-layout">
+          <div>
+            <div class="import-step-label"><span class="import-step-num">1</span> Selecione o modelo</div>
+            <div class="model-grid" id="model-grid">
+              <div class="model-empty"><i class="ti ti-loader-2 spin"></i> Carregando modelos...</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="import-step-label"><span class="import-step-num">2</span> Envie o arquivo CSV</div>
+            <div class="dropzone" id="import-dropzone">
+              <input type="file" id="import-file" accept=".csv" hidden>
+              <i class="ti ti-cloud-upload dz-icon"></i>
+              <div class="dz-title">Arraste o arquivo aqui ou <span class="dz-link">clique para selecionar</span></div>
+              <div class="dz-hint">Apenas arquivos .csv da CVM (separador “;”, codificação ISO-8859-1)</div>
+              <div class="dz-file" id="import-file-info"></div>
+            </div>
+            <div class="import-actions">
+              <button class="btn btn-gold" id="btn-importar" disabled><i class="ti ti-player-play"></i> Iniciar importação</button>
+              <button class="btn btn-ghost" id="btn-importar-reset"><i class="ti ti-eraser"></i> Limpar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel de progresso / resultado -->
+        <div class="import-progress" id="import-progress">
+          <div class="ip-head">
+            <div class="ip-ring" id="ip-ring">
+              <svg viewBox="0 0 120 120">
+                <circle class="ip-ring-track" cx="60" cy="60" r="52"></circle>
+                <circle class="ip-ring-fill" id="ip-ring-fill" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <div class="ip-ring-label" id="ip-percent">0%</div>
+            </div>
+            <div class="ip-info">
+              <div class="ip-status" id="ip-status"><span class="ip-dot"></span><span id="ip-status-text">Processando...</span></div>
+              <div class="ip-model" id="ip-model">—</div>
+              <div class="ip-badges" id="ip-badges"></div>
+              <div class="ip-bar"><div class="ip-bar-fill" id="ip-bar-fill"></div></div>
+              <div class="ip-metrics">
+                <div class="ip-metric"><span class="ip-m-l">Linhas importadas</span><span class="ip-m-v" id="ip-linhas">0</span></div>
+                <div class="ip-metric"><span class="ip-m-l">Linhas removidas</span><span class="ip-m-v" id="ip-removidas">0</span></div>
+                <div class="ip-metric"><span class="ip-m-l">Processado</span><span class="ip-m-v" id="ip-bytes">0 B</span></div>
+                <div class="ip-metric"><span class="ip-m-l">Tabela destino</span><span class="ip-m-v" id="ip-tabela">—</span></div>
+              </div>
+              <div class="ip-message" id="ip-message"></div>
+              <div class="ip-actions">
+                <button class="btn btn-ghost" id="btn-importar-cancelar"><i class="ti ti-x"></i> Cancelar</button>
+                <button class="btn btn-primary import-hidden" id="btn-importar-novo"><i class="ti ti-plus"></i> Nova importação</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histórico de importações -->
+        <div class="hist-card">
+          <div class="hist-head">
+            <div class="hist-title"><i class="ti ti-history"></i> Histórico de importações</div>
+            <button class="btn btn-ghost" id="btn-hist-refresh"><i class="ti ti-refresh"></i> Atualizar</button>
+          </div>
+          <div class="hist-table-wrap">
+            <table class="hist-table">
+              <thead>
+                <tr>
+                  <th>Data</th><th>Modelo</th><th>Conjunto</th><th>Ano</th><th>Arquivo</th>
+                  <th class="num">Importadas</th><th class="num">Removidas</th><th>Status</th><th>Usuário</th>
+                </tr>
+              </thead>
+              <tbody id="hist-body">
+                <tr><td colspan="9" class="hist-empty"><i class="ti ti-loader-2 spin"></i> Carregando histórico...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CONFIGURAÇÕES ===== -->
+      <section class="view" id="view-config">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Configurações</div>
+            <div class="page-subtitle">Conexão com o SQL Server e provedores de IA.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-database"></i> Conexão SQL Server</div>
+          <div class="card-sub">Os dados são cifrados em repouso (Data Protection). A senha nunca é exibida.</div>
+          <div class="form-grid">
+            <div class="form-field"><label>Servidor</label><input type="text" id="cfg-server" placeholder="host\\instancia ou host"></div>
+            <div class="form-field"><label>Porta</label><input type="text" id="cfg-port" value="1433"></div>
+            <div class="form-field"><label>Banco de dados</label><input type="text" id="cfg-db" placeholder="AustralCredito"></div>
+            <div class="form-field"><label>Autenticação</label>
+              <select id="cfg-auth"><option value="sql">SQL Server</option><option value="windows">Windows</option></select>
+            </div>
+            <div class="form-field" id="fld-user"><label>Usuário</label><input type="text" id="cfg-user" autocomplete="off"></div>
+            <div class="form-field" id="fld-pass"><label>Senha</label><input type="password" id="cfg-pass" autocomplete="new-password" placeholder="••••••••"></div>
+            <div class="form-field"><label>Timeout (s)</label><input type="number" id="cfg-timeout" value="30" min="1"></div>
+            <div class="form-field" style="justify-content:flex-end;gap:10px;">
+              <label class="check-row"><input type="checkbox" id="cfg-encrypt" checked> Encrypt</label>
+              <label class="check-row"><input type="checkbox" id="cfg-trust"> Trust Server Certificate</label>
+            </div>
+          </div>
+          <div class="test-steps app-hidden" id="cfg-test-steps">
+            <div class="test-step" data-step="net"><div class="ts-name"><span class="dot-state"></span> Rede</div><div class="ts-msg">—</div><div class="ts-ms"></div></div>
+            <div class="test-step" data-step="auth"><div class="ts-name"><span class="dot-state"></span> Autenticação</div><div class="ts-msg">—</div><div class="ts-ms"></div></div>
+            <div class="test-step" data-step="db"><div class="ts-name"><span class="dot-state"></span> Banco</div><div class="ts-msg">—</div><div class="ts-ms"></div></div>
+            <div class="test-step" data-step="app"><div class="ts-name"><span class="dot-state"></span> Aplicação</div><div class="ts-msg">—</div><div class="ts-ms"></div></div>
+          </div>
+          <div class="test-summary app-hidden" id="cfg-test-summary"></div>
+          <div class="form-actions">
+            <button class="btn btn-ghost" id="btn-test"><i class="ti ti-plug"></i> Testar conexão</button>
+            <button class="btn btn-primary" id="btn-save-config"><i class="ti ti-device-floppy"></i> Salvar configuração</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="ti ti-robot"></i> Provedores de IA</div>
+          <div class="card-sub">Chaves cifradas em repouso. Deixe a chave em branco para manter a já salva.</div>
+          <div class="form-grid">
+            <div class="form-field"><label>Provedor ativo</label>
+              <select id="ia-provider"><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option></select>
+            </div>
+            <div class="form-field" style="justify-content:flex-end;"><label class="check-row"><input type="checkbox" id="ia-websearch" checked> Habilitar busca na internet</label></div>
+            <div class="form-field"><label>OpenAI — modelo</label><input type="text" id="ia-openai-model" placeholder="gpt-4o"></div>
+            <div class="form-field"><label>OpenAI — API key</label><input type="password" id="ia-openai-key" autocomplete="new-password" placeholder="sk-..."></div>
+            <div class="form-field"><label>Anthropic — modelo</label><input type="text" id="ia-anthropic-model" placeholder="claude-sonnet-4-6"></div>
+            <div class="form-field"><label>Anthropic — API key</label><input type="password" id="ia-anthropic-key" autocomplete="new-password" placeholder="sk-ant-..."></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-ghost" id="btn-ia-test"><i class="ti ti-plug"></i> Testar IA</button>
+            <button class="btn btn-primary" id="btn-ia-save"><i class="ti ti-device-floppy"></i> Salvar IA</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== USUÁRIOS ===== -->
+      <section class="view" id="view-usuarios">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Usuários</div>
+            <div class="page-subtitle">Gestão de acessos internos (perfis Gestor e Operador).</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" id="btn-novo-usuario"><i class="ti ti-user-plus"></i> Novo usuário</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><div class="table-title">Usuários cadastrados</div><div class="table-count" id="usuarios-count">—</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>Login</th><th>Perfil</th><th>Status</th><th>Último acesso</th><th></th></tr></thead>
+              <tbody id="usuarios-body">
+                <tr class="table-state"><td colspan="6"><i class="ti ti-loader-2 spin state-icon"></i>Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ===== MODAL: trocar senha ===== -->
+<div class="overlay" id="modal-senha">
+  <div class="modal">
+    <h3>Trocar senha</h3>
+    <p class="sub">Defina uma nova senha (mínimo 8 caracteres).</p>
+    <div class="form-grid">
+      <div class="form-field"><label>Senha atual</label><input type="password" id="ms-atual" autocomplete="current-password"></div>
+      <div class="form-field"><label>Nova senha</label><input type="password" id="ms-nova" autocomplete="new-password"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="ms-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="ms-save">Salvar nova senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: novo usuário ===== -->
+<div class="overlay" id="modal-usuario">
+  <div class="modal">
+    <h3>Novo usuário</h3>
+    <p class="sub">O usuário deverá trocar a senha no primeiro acesso.</p>
+    <div class="form-grid">
+      <div class="form-field"><label>Nome completo</label><input type="text" id="nu-nome"></div>
+      <div class="form-field"><label>Login</label><input type="text" id="nu-login" autocomplete="off"></div>
+      <div class="form-field"><label>E-mail (opcional)</label><input type="email" id="nu-email" autocomplete="off"></div>
+      <div class="form-field"><label>Perfil</label><select id="nu-perfil"><option value="OPERADOR">Operador</option><option value="GESTOR">Gestor</option></select></div>
+      <div class="form-field"><label>Senha inicial</label><input type="password" id="nu-senha" autocomplete="new-password"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="nu-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="nu-save">Criar usuário</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toast-msg"></span></div>
+
+<script>
+const TOKEN_KEY = 'aca_token';
+const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+let currentUser = null;
+let creditoRows = [];
+
+/* ---------- token storage ---------- */
+function getToken() { return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY); }
+function setToken(t, remember) {
+  clearToken();
+  (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, t);
+}
+function clearToken() { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); }
+
+/* ---------- fetch helper ---------- */
+async function authFetch(path, options = {}) {
+  const opts = { ...options, headers: { ...(options.headers || {}) } };
+  // FormData (upload de arquivo) precisa que o browser defina o Content-Type com o boundary
+  // do multipart; forcar application/json aqui geraria 415 no servidor.
+  const isFormData = typeof FormData !== 'undefined' && opts.body instanceof FormData;
+  if (opts.body && !isFormData && !opts.headers['Content-Type']) opts.headers['Content-Type'] = 'application/json';
+  const t = getToken();
+  if (t) opts.headers['Authorization'] = 'Bearer ' + t;
+  const res = await fetch(path, opts);
+  if (res.status === 401 && currentUser) { doLogout(false); }
+  return res;
+}
+async function parseJson(res) { try { return await res.json(); } catch { return {}; } }
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  el.classList.toggle('error', isError);
+  el.querySelector('i').className = isError ? 'ti ti-alert-circle' : 'ti ti-circle-check';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ---------- login ---------- */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.classList.remove('show');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const remember = document.getElementById('login-remember').checked;
+    const res = await fetch('api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        login: document.getElementById('login-user').value.trim(),
+        senha: document.getElementById('login-pass').value,
+        lembrarMe: remember,
+      }),
+    });
+    const data = await parseJson(res);
+    if (!res.ok) {
+      err.textContent = data.message || 'Não foi possível entrar.';
+      err.classList.add('show');
+      if (res.status === 409) document.getElementById('login-hint').textContent = data.message || '';
+      return;
+    }
+    setToken(data.token, remember);
+    currentUser = data.usuario;
+    enterApp();
+  } catch {
+    err.textContent = 'Falha de conexão com o servidor.';
+    err.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+});
+
+function showLogin() {
+  document.getElementById('app').classList.add('app-hidden');
+  document.getElementById('auth-gate').classList.add('open');
+}
+
+async function doLogout(callApi = true) {
+  if (callApi) { try { await authFetch('api/auth/logout', { method: 'POST' }); } catch {} }
+  clearToken();
+  currentUser = null;
+  showLogin();
+}
+document.getElementById('btn-logout').addEventListener('click', () => doLogout());
+
+/* ---------- bootstrap ---------- */
+async function init() {
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  const t = getToken();
+  if (t) {
+    const res = await authFetch('api/auth/me');
+    if (res.ok) { currentUser = await res.json(); enterApp(); return; }
+    clearToken();
+  }
+  showLogin();
+}
+
+function enterApp() {
+  document.getElementById('auth-gate').classList.remove('open');
+  document.getElementById('app').classList.remove('app-hidden');
+  const isGestor = currentUser.perfilCodigo === 'GESTOR';
+  document.getElementById('nav-admin').style.display = isGestor ? '' : 'none';
+  document.getElementById('user-name').textContent = currentUser.nomeCompleto;
+  document.getElementById('user-perfil').textContent = isGestor ? 'Gestor' : 'Operador';
+  document.getElementById('user-avatar').textContent = (currentUser.nomeCompleto || '?').trim().slice(0, 2).toUpperCase();
+  if (currentUser.mustChangePassword) openModal('modal-senha');
+  switchView('credito');
+  loadCredito();
+}
+
+/* ---------- navigation ---------- */
+document.querySelectorAll('.nav-item').forEach(el =>
+  el.addEventListener('click', () => switchView(el.dataset.view)));
+
+function switchView(view) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+  document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === 'view-' + view));
+  if (view === 'config') { loadConfig(); loadIaConfig(); }
+  if (view === 'usuarios') loadUsuarios();
+  if (view === 'importacao') { loadModelos(); carregarHistorico(); }
+}
+
+/* ---------- crédito ---------- */
+function dateToYmd(v) { return v ? v.replaceAll('-', '') : ''; }
+
+async function loadCredito() {
+  const body = document.getElementById('credito-body');
+  body.innerHTML = '<tr class="table-state"><td colspan="9"><i class="ti ti-loader-2 spin state-icon"></i>Carregando...</td></tr>';
+  const qs = new URLSearchParams();
+  const de = dateToYmd(document.getElementById('filtro-de').value);
+  const ate = dateToYmd(document.getElementById('filtro-ate').value);
+  const status = document.getElementById('filtro-status').value;
+  if (de) qs.set('dataInicial', de);
+  if (ate) qs.set('dataFinal', ate);
+  if (status) qs.set('status', status);
+  try {
+    const res = await authFetch('api/credito' + (qs.toString() ? '?' + qs.toString() : ''));
+    if (!res.ok) {
+      const d = await parseJson(res);
+      body.innerHTML = `<tr class="table-state error"><td colspan="9"><i class="ti ti-alert-triangle state-icon"></i>${d.message || 'Falha ao carregar.'}</td></tr>`;
+      resetKpis();
+      return;
+    }
+    creditoRows = await res.json();
+    renderCredito();
+  } catch {
+    body.innerHTML = '<tr class="table-state error"><td colspan="9"><i class="ti ti-plug-connected-x state-icon"></i>Sem conexão com o servidor.</td></tr>';
+  }
+}
+
+function applyBusca(rows) {
+  const q = document.getElementById('filtro-busca').value.trim().toLowerCase();
+  if (!q) return rows;
+  return rows.filter(r =>
+    [r.tomador, r.documento, r.analista, r.rating, r.status].some(v => (v || '').toString().toLowerCase().includes(q)));
+}
+
+function statusBadge(s) {
+  const map = {
+    APROVADO: ['badge-success', 'Aprovado'],
+    REPROVADO: ['badge-danger', 'Reprovado'],
+    EM_ANALISE: ['badge-warning', 'Em análise'],
+  };
+  const [cls, label] = map[s] || ['badge-neutral', s || '—'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function scorePill(score) {
+  if (score == null) return '<span class="cell-mono">—</span>';
+  const cls = score >= 700 ? 'score-hi' : score >= 550 ? 'score-mid' : 'score-lo';
+  return `<span class="score-pill ${cls}">${score}</span>`;
+}
+
+function renderCredito() {
+  const rows = applyBusca(creditoRows);
+  const body = document.getElementById('credito-body');
+  document.getElementById('table-count').textContent = `${rows.length} de ${creditoRows.length} análise(s)`;
+  if (!rows.length) {
+    body.innerHTML = '<tr class="table-state"><td colspan="9"><i class="ti ti-mood-empty state-icon"></i>Nenhuma análise encontrada.</td></tr>';
+  } else {
+    body.innerHTML = rows.map(r => `
+      <tr>
+        <td class="cell-mono">${r.dataAnalise || '—'}</td>
+        <td class="td-company" title="${r.tomador || ''}">${r.tomador || '—'}</td>
+        <td class="cell-mono">${formatDoc(r.documento)}</td>
+        <td class="valor-cell">${fmtBRL.format(r.valorSolicitado || 0)}</td>
+        <td>${scorePill(r.scoreCredito)}</td>
+        <td><span class="badge badge-neutral">${r.rating || '—'}</span></td>
+        <td class="cell-mono">${r.probabilidadeInadimplencia != null ? r.probabilidadeInadimplencia.toFixed(1) + '%' : '—'}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>${r.analista || '—'}</td>
+      </tr>`).join('');
+  }
+  renderKpis();
+}
+
+function formatDoc(d) {
+  if (!d) return '—';
+  const v = d.replace(/\D/g, '');
+  if (v.length === 14) return `${v.slice(0,2)}.${v.slice(2,5)}.${v.slice(5,8)}/${v.slice(8,12)}-${v.slice(12)}`;
+  if (v.length === 11) return `${v.slice(0,3)}.${v.slice(3,6)}.${v.slice(6,9)}-${v.slice(9)}`;
+  return d;
+}
+
+function resetKpis() {
+  ['kpi-total','kpi-aprovadas','kpi-pendentes','kpi-valor','kpi-score'].forEach(id => document.getElementById(id).textContent = '—');
+}
+function renderKpis() {
+  const rows = creditoRows;
+  const total = rows.length;
+  const aprovadas = rows.filter(r => r.status === 'APROVADO').length;
+  const reprovadas = rows.filter(r => r.status === 'REPROVADO').length;
+  const emAnalise = rows.filter(r => r.status === 'EM_ANALISE').length;
+  const valor = rows.reduce((s, r) => s + (r.valorSolicitado || 0), 0);
+  const scores = rows.map(r => r.scoreCredito).filter(v => v != null);
+  const scoreMedio = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-aprovadas').textContent = aprovadas;
+  document.getElementById('kpi-aprovadas-sub').textContent = total ? `${Math.round(aprovadas / total * 100)}% do total` : '—';
+  document.getElementById('kpi-pendentes').textContent = reprovadas + emAnalise;
+  document.getElementById('kpi-pendentes-sub').textContent = `${reprovadas} reprovada(s) · ${emAnalise} em análise`;
+  document.getElementById('kpi-valor').textContent = fmtBRL.format(valor);
+  document.getElementById('kpi-score').textContent = scoreMedio != null ? scoreMedio : '—';
+}
+
+document.getElementById('filtro-busca').addEventListener('input', renderCredito);
+document.getElementById('btn-filtrar').addEventListener('click', loadCredito);
+document.getElementById('btn-reload').addEventListener('click', loadCredito);
+document.getElementById('filtro-status').addEventListener('change', loadCredito);
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  const rows = applyBusca(creditoRows);
+  if (!rows.length) { toast('Nada para exportar.', true); return; }
+  const head = ['Data','Tomador','Documento','ValorSolicitado','Score','Rating','Risco','Status','Analista'];
+  const csv = [head.join(';')].concat(rows.map(r => [
+    r.dataAnalise, r.tomador, formatDoc(r.documento), (r.valorSolicitado || 0).toFixed(2).replace('.', ','),
+    r.scoreCredito ?? '', r.rating ?? '', r.probabilidadeInadimplencia ?? '', r.status, r.analista ?? ''
+  ].map(c => `"${(c ?? '').toString().replace(/"/g, '""')}"`).join(';'))).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `analises-credito-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+});
+
+/* ---------- config: conexão ---------- */
+function toggleAuthFields() {
+  const win = document.getElementById('cfg-auth').value === 'windows';
+  document.getElementById('fld-user').style.opacity = win ? '0.5' : '1';
+  document.getElementById('fld-pass').style.opacity = win ? '0.5' : '1';
+  document.getElementById('cfg-user').disabled = win;
+  document.getElementById('cfg-pass').disabled = win;
+}
+document.getElementById('cfg-auth').addEventListener('change', toggleAuthFields);
+
+async function loadConfig() {
+  try {
+    const res = await authFetch('api/config');
+    if (!res.ok) return;
+    const c = await res.json();
+    if (!c.isConfigured) return;
+    document.getElementById('cfg-server').value = c.server || '';
+    document.getElementById('cfg-port').value = c.port || '1433';
+    document.getElementById('cfg-db').value = c.database || '';
+    document.getElementById('cfg-auth').value = c.authMode || 'sql';
+    document.getElementById('cfg-user').value = c.user || '';
+    document.getElementById('cfg-pass').value = '';
+    document.getElementById('cfg-pass').placeholder = c.passwordMask || '••••••••';
+    document.getElementById('cfg-timeout').value = c.connectionTimeout || 30;
+    document.getElementById('cfg-encrypt').checked = !!c.encrypt;
+    document.getElementById('cfg-trust').checked = !!c.trustServerCertificate;
+    toggleAuthFields();
+  } catch {}
+}
+
+function readConfigForm() {
+  return {
+    server: document.getElementById('cfg-server').value.trim(),
+    port: document.getElementById('cfg-port').value.trim(),
+    database: document.getElementById('cfg-db').value.trim(),
+    authMode: document.getElementById('cfg-auth').value,
+    user: document.getElementById('cfg-user').value.trim(),
+    password: document.getElementById('cfg-pass').value,
+    encrypt: document.getElementById('cfg-encrypt').checked,
+    trustServerCertificate: document.getElementById('cfg-trust').checked,
+    connectionTimeout: parseInt(document.getElementById('cfg-timeout').value, 10) || 30,
+  };
+}
+
+document.getElementById('btn-test').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-test');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Testando...';
+  const stepsEl = document.getElementById('cfg-test-steps');
+  const summaryEl = document.getElementById('cfg-test-summary');
+  stepsEl.classList.remove('app-hidden'); summaryEl.classList.add('app-hidden');
+  try {
+    const res = await authFetch('api/config/test', { method: 'POST', body: JSON.stringify(readConfigForm()) });
+    const r = await parseJson(res);
+    if (!res.ok) { toast(r.message || 'Falha no teste.', true); return; }
+    ['net','auth','db','app'].forEach(k => {
+      const el = stepsEl.querySelector(`[data-step="${k}"]`);
+      const s = r[k] || {};
+      el.classList.remove('on','off');
+      if (s.state === 'on') el.classList.add('on');
+      else if (s.state === 'off') el.classList.add('off');
+      el.querySelector('.ts-msg').textContent = s.message || '—';
+      el.querySelector('.ts-ms').textContent = s.ms != null ? s.ms + ' ms' : '';
+    });
+    summaryEl.classList.remove('app-hidden');
+    summaryEl.classList.toggle('ok', r.ok);
+    summaryEl.classList.toggle('fail', !r.ok);
+    summaryEl.textContent = `${r.message} (${r.totalMs} ms)`;
+  } catch { toast('Falha de conexão ao testar.', true); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="ti ti-plug"></i> Testar conexão'; }
+});
+
+document.getElementById('btn-save-config').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-save-config');
+  btn.disabled = true;
+  try {
+    const res = await authFetch('api/config', { method: 'POST', body: JSON.stringify(readConfigForm()) });
+    const r = await parseJson(res);
+    if (!res.ok) { toast(r.message || 'Falha ao salvar.', true); return; }
+    toast('Configuração salva. Migrações aplicadas.');
+    loadCredito();
+  } catch { toast('Falha de conexão ao salvar.', true); }
+  finally { btn.disabled = false; }
+});
+
+/* ---------- config: IA ---------- */
+async function loadIaConfig() {
+  try {
+    const res = await authFetch('api/ia/config');
+    if (!res.ok) return;
+    const c = await res.json();
+    document.getElementById('ia-provider').value = c.provedorAtivo || 'openai';
+    document.getElementById('ia-websearch').checked = !!c.webSearch;
+    document.getElementById('ia-openai-model').value = c.openAiModelo || '';
+    document.getElementById('ia-anthropic-model').value = c.anthropicModelo || '';
+    document.getElementById('ia-openai-key').placeholder = c.openAiConfigurada ? c.openAiMask : 'sk-...';
+    document.getElementById('ia-anthropic-key').placeholder = c.anthropicConfigurada ? c.anthropicMask : 'sk-ant-...';
+  } catch {}
+}
+function readIaForm() {
+  return {
+    provedorAtivo: document.getElementById('ia-provider').value,
+    webSearch: document.getElementById('ia-websearch').checked,
+    timeoutSeconds: 60,
+    openAiModelo: document.getElementById('ia-openai-model').value.trim(),
+    openAiApiKey: document.getElementById('ia-openai-key').value.trim(),
+    anthropicModelo: document.getElementById('ia-anthropic-model').value.trim(),
+    anthropicApiKey: document.getElementById('ia-anthropic-key').value.trim(),
+  };
+}
+document.getElementById('btn-ia-save').addEventListener('click', async () => {
+  try {
+    const res = await authFetch('api/ia/config', { method: 'POST', body: JSON.stringify(readIaForm()) });
+    const r = await parseJson(res);
+    if (!res.ok) { toast(r.message || 'Falha ao salvar IA.', true); return; }
+    toast('Configuração de IA salva.');
+    document.getElementById('ia-openai-key').value = '';
+    document.getElementById('ia-anthropic-key').value = '';
+    loadIaConfig();
+  } catch { toast('Falha de conexão.', true); }
+});
+document.getElementById('btn-ia-test').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-ia-test');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Testando...';
+  try {
+    const res = await authFetch('api/ia/config/test', { method: 'POST' });
+    const r = await parseJson(res);
+    toast(r.message || (res.ok ? 'IA OK.' : 'Falha na IA.'), !res.ok);
+  } catch { toast('Falha de conexão.', true); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="ti ti-plug"></i> Testar IA'; }
+});
+
+/* ---------- usuários ---------- */
+async function loadUsuarios() {
+  const body = document.getElementById('usuarios-body');
+  body.innerHTML = '<tr class="table-state"><td colspan="6"><i class="ti ti-loader-2 spin state-icon"></i>Carregando...</td></tr>';
+  try {
+    const res = await authFetch('api/usuarios');
+    if (!res.ok) {
+      const d = await parseJson(res);
+      body.innerHTML = `<tr class="table-state error"><td colspan="6"><i class="ti ti-alert-triangle state-icon"></i>${d.message || 'Falha ao carregar.'}</td></tr>`;
+      return;
+    }
+    const list = await res.json();
+    document.getElementById('usuarios-count').textContent = `${list.length} usuário(s)`;
+    body.innerHTML = list.map(u => `
+      <tr>
+        <td>${u.nomeCompleto}</td>
+        <td class="cell-mono">${u.login}</td>
+        <td><span class="badge ${u.perfilCodigo === 'GESTOR' ? 'badge-info' : 'badge-neutral'}">${u.perfilNome}</span></td>
+        <td><span class="badge ${u.ativo ? 'badge-success' : 'badge-danger'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
+        <td class="cell-mono">${u.ultimoLoginUtc ? new Date(u.ultimoLoginUtc).toLocaleString('pt-BR') : '—'}</td>
+        <td><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;" data-toggle="${u.id}" data-ativo="${u.ativo}">${u.ativo ? 'Desativar' : 'Ativar'}</button></td>
+      </tr>`).join('');
+    body.querySelectorAll('[data-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => toggleUsuario(btn.dataset.toggle, btn.dataset.ativo !== 'true')));
+  } catch { body.innerHTML = '<tr class="table-state error"><td colspan="6">Sem conexão.</td></tr>'; }
+}
+
+async function toggleUsuario(id, ativo) {
+  try {
+    const res = await authFetch(`api/usuarios/${id}/status`, { method: 'PUT', body: JSON.stringify({ ativo }) });
+    const r = await parseJson(res);
+    if (!res.ok) { toast(r.message || 'Falha.', true); return; }
+    toast('Status atualizado.');
+    loadUsuarios();
+  } catch { toast('Falha de conexão.', true); }
+}
+
+document.getElementById('btn-novo-usuario').addEventListener('click', () => openModal('modal-usuario'));
+document.getElementById('nu-cancel').addEventListener('click', () => closeModal('modal-usuario'));
+document.getElementById('nu-save').addEventListener('click', async () => {
+  const payload = {
+    nomeCompleto: document.getElementById('nu-nome').value.trim(),
+    login: document.getElementById('nu-login').value.trim(),
+    email: document.getElementById('nu-email').value.trim(),
+    perfilCodigo: document.getElementById('nu-perfil').value,
+    senha: document.getElementById('nu-senha').value,
+  };
+  try {
+    const res = await authFetch('api/usuarios', { method: 'POST', body: JSON.stringify(payload) });
+    const r = await parseJson(res);
+    if (!res.ok) { toast(r.message || 'Falha ao criar.', true); return; }
+    toast('Usuário criado.');
+    closeModal('modal-usuario');
+    ['nu-nome','nu-login','nu-email','nu-senha'].forEach(id => document.getElementById(id).value = '');
+    loadUsuarios();
+  } catch { toast('Falha de conexão.', true); }
+});
+
+/* ---------- trocar senha ---------- */
+document.getElementById('ms-cancel').addEventListener('click', () => closeModal('modal-senha'));
+document.getElementById('ms-save').addEventListener('click', async () => {
+  const payload = {
+    senhaAtual: document.getElementById('ms-atual').value,
+    novaSenha: document.getElementById('ms-nova').value,
+  };
+  try {
+    const res = await authFetch('api/auth/change-password', { method: 'POST', body: JSON.stringify(payload) });
+    const r = await parseJson(res);
+    if (!res.ok) { toast(r.message || 'Falha ao trocar senha.', true); return; }
+    toast('Senha alterada com sucesso.');
+    closeModal('modal-senha');
+    document.getElementById('ms-atual').value = ''; document.getElementById('ms-nova').value = '';
+  } catch { toast('Falha de conexão.', true); }
+});
+
+/* ---------- importação de modelos ---------- */
+const MODELO_META = {
+  DOCUMENTO:           { icon: 'ti-file-stack',       rotulo: 'Documentos' },
+  DRE:                 { icon: 'ti-report-money',      rotulo: 'DRE' },
+  BPA:                 { icon: 'ti-scale',             rotulo: 'Balanço Ativo' },
+  BPP:                 { icon: 'ti-scale-outline',     rotulo: 'Balanço Passivo' },
+  DRA:                 { icon: 'ti-chart-area-line',   rotulo: 'Result. Abrangente' },
+  DVA:                 { icon: 'ti-coins',             rotulo: 'Valor Adicionado' },
+  DFC_MD:              { icon: 'ti-cash',              rotulo: 'Fluxo Caixa (MD)' },
+  DFC_MI:              { icon: 'ti-cash-banknote',     rotulo: 'Fluxo Caixa (MI)' },
+  DMPL:                { icon: 'ti-arrows-exchange',   rotulo: 'Mutações do PL' },
+  COMPOSICAO_CAPITAL:  { icon: 'ti-chart-pie',         rotulo: 'Composição Capital' },
+  PARECER:             { icon: 'ti-file-certificate',  rotulo: 'Parecer / Auditor' },
+};
+
+let modelosCache = null;
+let modeloSelecionado = null;
+let arquivoSelecionado = null;
+let importPollTimer = null;
+let importJobId = null;
+
+function fmtBytes(b) {
+  if (b == null) return '0 B';
+  if (b < 1024) return b + ' B';
+  const u = ['KB','MB','GB','TB'];
+  let i = -1, v = b;
+  do { v /= 1024; i++; } while (v >= 1024 && i < u.length - 1);
+  return v.toFixed(v < 10 ? 1 : 0) + ' ' + u[i];
+}
+
+async function loadModelos() {
+  const grid = document.getElementById('model-grid');
+  if (modelosCache) { renderModelos(); return; }
+  grid.innerHTML = '<div class="model-empty"><i class="ti ti-loader-2 spin"></i> Carregando modelos...</div>';
+  try {
+    const res = await authFetch('api/dfp/tipos');
+    if (!res.ok) {
+      const d = await parseJson(res);
+      grid.innerHTML = `<div class="model-empty"><i class="ti ti-alert-triangle"></i> ${d.message || 'Falha ao carregar modelos.'}</div>`;
+      return;
+    }
+    modelosCache = await res.json();
+    renderModelos();
+  } catch {
+    grid.innerHTML = '<div class="model-empty"><i class="ti ti-plug-connected-x"></i> Sem conexão com o servidor.</div>';
+  }
+}
+
+function renderModelos() {
+  const grid = document.getElementById('model-grid');
+  if (!modelosCache || !modelosCache.length) {
+    grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível.</div>';
+    return;
+  }
+  grid.innerHTML = modelosCache.map(m => {
+    const meta = MODELO_META[m.tipo] || { icon: 'ti-table', rotulo: m.tipo };
+    const sel = modeloSelecionado === m.tipo ? ' selected' : '';
+    return `<div class="model-card${sel}" data-tipo="${m.tipo}" title="${m.descricao || ''}">
+        <div class="mc-check"><i class="ti ti-check"></i></div>
+        <div class="mc-icon"><i class="ti ${meta.icon}"></i></div>
+        <div class="mc-name">${meta.rotulo}</div>
+        <div class="mc-desc">${m.descricao || m.tipo}</div>
+      </div>`;
+  }).join('');
+  grid.querySelectorAll('.model-card').forEach(card =>
+    card.addEventListener('click', () => selecionarModelo(card.dataset.tipo)));
+}
+
+function selecionarModelo(tipo) {
+  modeloSelecionado = modeloSelecionado === tipo ? null : tipo;
+  document.querySelectorAll('#model-grid .model-card').forEach(c =>
+    c.classList.toggle('selected', c.dataset.tipo === modeloSelecionado));
+  atualizarBotaoImportar();
+}
+
+function atualizarBotaoImportar() {
+  document.getElementById('btn-importar').disabled = !(modeloSelecionado && arquivoSelecionado);
+}
+
+/* dropzone */
+const dropzone = document.getElementById('import-dropzone');
+const importFile = document.getElementById('import-file');
+dropzone.addEventListener('click', () => importFile.click());
+importFile.addEventListener('change', () => { if (importFile.files.length) setArquivo(importFile.files[0]); });
+['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+dropzone.addEventListener('drop', e => { if (e.dataTransfer.files.length) setArquivo(e.dataTransfer.files[0]); });
+
+function setArquivo(file) {
+  if (!/\.csv$/i.test(file.name)) { toast('Selecione um arquivo .csv válido.', true); return; }
+  arquivoSelecionado = file;
+  dropzone.classList.add('has-file');
+  document.getElementById('import-file-info').innerHTML =
+    `<i class="ti ti-file-check"></i> ${file.name} · ${fmtBytes(file.size)}`;
+  atualizarBotaoImportar();
+}
+
+function resetImportForm() {
+  modeloSelecionado = null;
+  arquivoSelecionado = null;
+  importFile.value = '';
+  dropzone.classList.remove('has-file');
+  document.getElementById('import-file-info').innerHTML = '';
+  document.querySelectorAll('#model-grid .model-card').forEach(c => c.classList.remove('selected'));
+  atualizarBotaoImportar();
+}
+document.getElementById('btn-importar-reset').addEventListener('click', resetImportForm);
+
+/* iniciar importação */
+document.getElementById('btn-importar').addEventListener('click', iniciarImportacao);
+async function iniciarImportacao() {
+  if (!modeloSelecionado || !arquivoSelecionado) return;
+  const btn = document.getElementById('btn-importar');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Enviando...';
+  try {
+    const fd = new FormData();
+    fd.append('arquivo', arquivoSelecionado);
+    const res = await authFetch(`api/dfp/importar/${encodeURIComponent(modeloSelecionado)}`, { method: 'POST', body: fd });
+    const d = await parseJson(res);
+    if (!res.ok) { toast(d.message || 'Falha ao iniciar importação.', true); return; }
+    importJobId = d.jobId;
+    abrirPainelProgresso();
+    pollStatus(importJobId);
+  } catch { toast('Falha de conexão ao enviar o arquivo.', true); }
+  finally { btn.innerHTML = '<i class="ti ti-player-play"></i> Iniciar importação'; atualizarBotaoImportar(); }
+}
+
+function abrirPainelProgresso() {
+  const panel = document.getElementById('import-progress');
+  panel.className = 'import-progress show';
+  const meta = MODELO_META[modeloSelecionado] || { rotulo: modeloSelecionado };
+  document.getElementById('ip-model').textContent = `${meta.rotulo} · ${arquivoSelecionado ? arquivoSelecionado.name : ''}`;
+  document.getElementById('ip-status-text').textContent = 'Iniciando...';
+  document.getElementById('ip-message').textContent = '';
+  document.getElementById('ip-tabela').textContent = '—';
+  document.getElementById('ip-removidas').textContent = '0';
+  document.getElementById('ip-badges').innerHTML = '';
+  document.getElementById('btn-importar-cancelar').classList.remove('import-hidden');
+  document.getElementById('btn-importar-novo').classList.add('import-hidden');
+  setProgresso(0, 0, 0, 0);
+}
+
+/* badges de conjunto/ano para o painel de status */
+const CONJUNTO_META = {
+  CON: { cls: 'b-con', icon: 'ti-building-bank', rotulo: 'Consolidado' },
+  IND: { cls: 'b-ind', icon: 'ti-building', rotulo: 'Individual' },
+  MIS: { cls: 'b-mis', icon: 'ti-alert-triangle', rotulo: 'Misto' },
+};
+function conjuntoBadge(conjunto) {
+  const m = CONJUNTO_META[conjunto];
+  return m
+    ? `<span class="badge ${m.cls}"><i class="ti ${m.icon}"></i> ${m.rotulo}</span>`
+    : `<span class="badge b-na"><i class="ti ti-minus"></i> Sem conjunto</span>`;
+}
+function renderBadges(s) {
+  const parts = [conjuntoBadge(s.conjunto)];
+  if (s.ano) parts.push(`<span class="badge b-ano"><i class="ti ti-calendar"></i> ${s.ano}</span>`);
+  if (s.linhasRemovidas > 0)
+    parts.push(`<span class="badge"><i class="ti ti-trash"></i> ${(s.linhasRemovidas).toLocaleString('pt-BR')} removidas</span>`);
+  if (s.conjunto === 'MIS')
+    parts.push(`<span class="badge b-warn"><i class="ti ti-alert-triangle"></i> Conjunto misto detectado</span>`);
+  document.getElementById('ip-badges').innerHTML = parts.join('');
+}
+
+function setProgresso(pct, linhas, bytes, total) {
+  pct = Math.max(0, Math.min(100, pct || 0));
+  const circ = 326.7;
+  document.getElementById('ip-ring-fill').style.strokeDashoffset = circ - (circ * pct / 100);
+  document.getElementById('ip-percent').textContent = Math.round(pct) + '%';
+  document.getElementById('ip-bar-fill').style.width = pct + '%';
+  document.getElementById('ip-linhas').textContent = (linhas || 0).toLocaleString('pt-BR');
+  document.getElementById('ip-bytes').textContent = total ? `${fmtBytes(bytes)} / ${fmtBytes(total)}` : fmtBytes(bytes);
+}
+
+function pollStatus(jobId) {
+  clearInterval(importPollTimer);
+  importPollTimer = setInterval(async () => {
+    if (importJobId !== jobId) { clearInterval(importPollTimer); return; }
+    try {
+      const res = await authFetch(`api/dfp/importar/status/${encodeURIComponent(jobId)}`);
+      if (!res.ok) { clearInterval(importPollTimer); return; }
+      const s = await res.json();
+      aplicarStatus(s);
+      if (['Concluido','Falha','Cancelado'].includes(s.status)) {
+        clearInterval(importPollTimer);
+        finalizarPainel(s);
+      }
+    } catch { /* mantém polling até resposta válida */ }
+  }, 800);
+}
+
+function aplicarStatus(s) {
+  setProgresso(s.percentual, s.linhasImportadas, s.bytesProcessados, s.bytesTotais);
+  document.getElementById('ip-tabela').textContent = s.tabela || '—';
+  document.getElementById('ip-removidas').textContent = (s.linhasRemovidas || 0).toLocaleString('pt-BR');
+  if (s.modelo) document.getElementById('ip-model').textContent = `${s.modelo} · ${s.arquivo || ''}`;
+  renderBadges(s);
+  const txt = { Pendente: 'Na fila...', Processando: 'Processando...' };
+  document.getElementById('ip-status-text').textContent = txt[s.status] || s.status;
+}
+
+function finalizarPainel(s) {
+  const panel = document.getElementById('import-progress');
+  panel.classList.remove('show'); panel.classList.add('show');
+  document.getElementById('btn-importar-cancelar').classList.add('import-hidden');
+  document.getElementById('btn-importar-novo').classList.remove('import-hidden');
+  const cls = { Concluido: 'done', Falha: 'failed', Cancelado: 'canceled' }[s.status] || '';
+  panel.className = `import-progress show ${cls}`;
+  const label = { Concluido: 'Importação concluída', Falha: 'Falha na importação', Cancelado: 'Importação cancelada' }[s.status] || s.status;
+  document.getElementById('ip-status-text').textContent = label;
+  document.getElementById('ip-message').textContent = s.mensagem || '';
+  document.getElementById('ip-removidas').textContent = (s.linhasRemovidas || 0).toLocaleString('pt-BR');
+  renderBadges(s);
+  if (s.status === 'Concluido') {
+    setProgresso(100, s.linhasImportadas, s.bytesTotais, s.bytesTotais);
+    toast(label + '.');
+    if (s.conjunto === 'MIS') toast('Atenção: o arquivo continha linhas Consolidado e Individual (misto).', true);
+  }
+  else if (s.status === 'Falha') toast(label + '.', true);
+  carregarHistorico();
+}
+
+document.getElementById('btn-importar-cancelar').addEventListener('click', async () => {
+  if (!importJobId) return;
+  const btn = document.getElementById('btn-importar-cancelar');
+  btn.disabled = true;
+  try { await authFetch(`api/dfp/importar/${encodeURIComponent(importJobId)}`, { method: 'DELETE' }); }
+  catch { toast('Falha ao solicitar cancelamento.', true); }
+  finally { btn.disabled = false; }
+});
+
+document.getElementById('btn-importar-novo').addEventListener('click', () => {
+  clearInterval(importPollTimer);
+  importJobId = null;
+  document.getElementById('import-progress').className = 'import-progress';
+  resetImportForm();
+});
+
+/* ---------- histórico de importações ---------- */
+document.getElementById('btn-hist-refresh').addEventListener('click', carregarHistorico);
+
+const HIST_STATUS_ICON = { Concluido: 'ti-circle-check', Falha: 'ti-circle-x', Cancelado: 'ti-ban', Processando: 'ti-loader-2 spin' };
+function histConjuntoLabel(c) {
+  const m = CONJUNTO_META[c];
+  return m ? `<span class="badge ${m.cls}">${m.rotulo}</span>` : '<span class="badge b-na">—</span>';
+}
+function fmtDataHora(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso.endsWith('Z') ? iso : iso + 'Z');
+  return isNaN(d) ? '—' : d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+async function carregarHistorico() {
+  const body = document.getElementById('hist-body');
+  if (!body) return;
+  body.innerHTML = '<tr><td colspan="9" class="hist-empty"><i class="ti ti-loader-2 spin"></i> Carregando histórico...</td></tr>';
+  try {
+    const res = await authFetch('api/dfp/importacoes?limite=100');
+    if (!res.ok) { body.innerHTML = '<tr><td colspan="9" class="hist-empty">Não foi possível carregar o histórico.</td></tr>'; return; }
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      body.innerHTML = '<tr><td colspan="9" class="hist-empty">Nenhuma importação registrada ainda.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => {
+      const meta = MODELO_META[r.tipo] || { rotulo: r.tipo };
+      const icon = HIST_STATUS_ICON[r.status] || 'ti-point';
+      return `<tr>
+        <td>${fmtDataHora(r.iniciadoEmUtc)}</td>
+        <td>${meta.rotulo}</td>
+        <td>${histConjuntoLabel(r.conjunto)}</td>
+        <td class="num">${r.ano || '—'}</td>
+        <td title="${(r.arquivo || '').replace(/"/g, '&quot;')}">${r.arquivo || '—'}</td>
+        <td class="num">${(r.linhasImportadas || 0).toLocaleString('pt-BR')}</td>
+        <td class="num">${(r.linhasRemovidas || 0).toLocaleString('pt-BR')}</td>
+        <td><span class="hist-status s-${r.status}"><i class="ti ${icon}"></i> ${r.status}</span></td>
+        <td>${r.usuario || '—'}</td>
+      </tr>`;
+    }).join('');
+  } catch {
+    body.innerHTML = '<tr><td colspan="9" class="hist-empty">Falha de conexão ao carregar o histórico.</td></tr>';
+  }
+}
+
+/* ---------- modal helpers ---------- */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(ov =>
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); }));
+
+init();
+</script>
+</body>
+</html>

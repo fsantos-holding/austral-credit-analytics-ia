@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>AustralCreditAnalytics.Api</RootNamespace>
+    <AssemblyName>AustralCreditAnalytics.Api</AssemblyName>
+    <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
+  </ItemGroup>
+
+  <!-- Scripts de migracao versionados, embutidos no assembly e aplicados no startup. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\*.sql" />
+  </ItemGroup>
+
+  <!-- O index.html canonico e os assets vivem na raiz do projeto; copiamos para wwwroot para que a API os sirva. -->
+  <ItemGroup>
+    <FrontendAssets Include="..\assets\**\*" />
+  </ItemGroup>
+  <Target Name="CopyFrontend" BeforeTargets="Build;Run">
+    <MakeDir Directories="wwwroot;wwwroot\assets" />
+    <Copy SourceFiles="..\index.html" DestinationFiles="wwwroot\index.html" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FrontendAssets)" DestinationFiles="@(FrontendAssets->'wwwroot\assets\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Pastas exigidas pelo IIS (logs do ANCM + Data Protection / connection.dat). -->
+  <Target Name="PrepareIisFolders" AfterTargets="Publish">
+    <MakeDir Directories="$(PublishDir)App_Data\keys;$(PublishDir)logs" />
+    <!-- Evita que o IIS execute um .exe de publish self-contained antigo (SqlClient quebra). -->
+    <Delete Files="$(PublishDir)AustralCreditAnalytics.Api.exe" Condition="Exists('$(PublishDir)AustralCreditAnalytics.Api.exe')" />
+  </Target>
+
+</Project>
