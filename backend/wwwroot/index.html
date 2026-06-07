@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --accent: #00C9BC;
@@ -104,6 +105,29 @@
   .field-inline { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
   .field-inline input, .filter-select { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--text-secondary); background: var(--surface-2); outline: none; }
   .filter-select { cursor: pointer; }
+
+  /* DOSSIÊ FRE — abas, gráficos e blocos */
+  .dossie-tabs { display: flex; gap: 6px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 8px; margin-bottom: 18px; box-shadow: var(--shadow); }
+  .dossie-tab { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; border: 1px solid transparent; white-space: nowrap; }
+  .dossie-tab:hover { background: var(--surface-2); color: var(--text-primary); }
+  .dossie-tab.active { background: var(--navy); color: #fff; box-shadow: var(--shadow); }
+  .dossie-tab i { font-size: 16px; }
+  .dossie-section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.7px; margin: 26px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .dossie-section-title i { color: var(--accent-ink); font-size: 15px; }
+  .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px 20px; }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-card h4 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; }
+  .chart-canvas-wrap { position: relative; height: 280px; }
+  .dossie-blocos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px 20px; }
+  .info-card .ic-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .info-card .ic-title i { color: var(--accent-ink); font-size: 16px; }
+  .info-row { display: flex; justify-content: space-between; gap: 14px; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .ir-l { color: var(--text-muted); }
+  .info-row .ir-v { color: var(--text-primary); font-weight: 500; text-align: right; }
+  .dossie-empty-mini { color: var(--text-muted); font-size: 13px; padding: 28px 20px; text-align: center; background: var(--surface-2); border-radius: var(--radius); border: 1px dashed var(--border); }
 
   /* TABLE */
   .table-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
@@ -235,6 +259,31 @@
   .dropzone .dz-file { display: none; margin-top: 14px; padding: 10px 14px; background: var(--success-bg); color: var(--success); border-radius: var(--radius); font-size: 12.5px; font-weight: 500; align-items: center; justify-content: center; gap: 8px; }
   .dropzone.has-file { border-style: solid; border-color: rgba(79,122,18,0.35); }
   .dropzone.has-file .dz-file { display: flex; }
+  /* Fila de importacao multipla (FRE) */
+  .fre-queue { margin-top: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+  .fre-queue-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .fre-queue-title { font-size: 14px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+  .fre-queue-actions { display: flex; gap: 8px; }
+  .fre-queue-summary { padding: 9px 18px; font-size: 12px; color: var(--text-muted); border-bottom: 1px solid var(--border); display: none; }
+  .fre-queue-summary.show { display: block; }
+  .fre-queue-list { max-height: 440px; overflow-y: auto; }
+  .fre-empty { padding: 22px; text-align: center; color: var(--text-muted); font-size: 12.5px; }
+  .fre-row { display: grid; grid-template-columns: 1fr 168px 1fr 132px; gap: 12px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .fre-row:last-child { border-bottom: none; }
+  .fre-row .fr-file { color: var(--text-primary); font-weight: 500; word-break: break-all; }
+  .fre-row .fr-sub { color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .fre-row .fr-model { color: var(--accent-ink); font-weight: 600; }
+  .fre-row .fr-model.unknown { color: var(--danger); }
+  .fre-bar { height: 6px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .fre-bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+  .fre-st { font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .fre-st.pendente { color: var(--text-muted); }
+  .fre-st.enviando, .fre-st.processando { color: var(--accent-ink); }
+  .fre-st.concluido { color: var(--success); }
+  .fre-st.falha { color: var(--danger); }
+  .fre-st.cancelado { color: var(--text-muted); }
+  .fre-row .fr-remove { cursor: pointer; color: var(--text-muted); margin-left: 6px; }
+  .fre-row .fr-remove:hover { color: var(--danger); }
   .import-actions { display: flex; gap: 10px; margin-top: 16px; }
 
   .import-progress { display: none; margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; }
@@ -772,8 +821,8 @@
       <section class="view" id="view-composicao">
         <div class="page-header">
           <div>
-            <div class="page-title">Composição de Capital</div>
-            <div class="page-subtitle">Grupo de capital do Formulário de Referência (FRE/CVM): capital social, aumentos/reduções, distribuição, posição acionária e direito de ação.</div>
+            <div class="page-title">Dossiê FRE</div>
+            <div class="page-subtitle">Formulário de Referência (FRE/CVM) consolidado por companhia: composição acionária, governança, remuneração, empregados, títulos no exterior e partes relacionadas.</div>
           </div>
         </div>
 
@@ -784,19 +833,6 @@
               <input type="text" id="comp-busca" placeholder="Buscar companhia por razão social ou CNPJ..." autocomplete="off">
             </div>
             <div class="dre-autocomplete" id="comp-autocomplete"></div>
-          </div>
-          <div class="field-inline">
-            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Modelo</label>
-            <select class="filter-select" id="comp-modelo">
-              <option value="capital_social">Capital Social</option>
-              <option value="capital_social_aumento">Aumento de Capital</option>
-              <option value="capital_social_reducao">Redução de Capital</option>
-              <option value="capital_social_desdobramento">Desdobramento</option>
-              <option value="capital_social_titulo_conversivel">Título Conversível</option>
-              <option value="distribuicao_capital">Distribuição de Capital</option>
-              <option value="posicao_acionaria">Posição Acionária</option>
-              <option value="direito_acao">Direito de Ação</option>
-            </select>
           </div>
           <div class="field-inline">
             <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
@@ -821,54 +857,22 @@
           <div class="dre-company-meta">
             <div class="dre-cm-item"><span class="dre-cm-l">Código CVM</span><span class="dre-cm-v" id="comp-co-cvm">—</span></div>
             <div class="dre-cm-item"><span class="dre-cm-l">Exercício</span><span class="dre-cm-v" id="comp-co-ano">—</span></div>
-            <div class="dre-cm-item"><span class="dre-cm-l">Modelo</span><span class="dre-cm-v" id="comp-co-modelo">—</span></div>
-            <div class="dre-cm-item"><span class="dre-cm-l">Registros</span><span class="dre-cm-v" id="comp-co-qtd">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Versão</span><span class="dre-cm-v" id="comp-co-versao">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Domínios</span><span class="dre-cm-v" id="comp-co-qtd">—</span></div>
           </div>
         </div>
 
-        <!-- KPIs de capital -->
-        <div class="kpi-grid app-hidden" id="comp-kpis">
-          <div class="kpi-card"><div class="kpi-label"><i class="ti ti-circle-letter-o"></i> Ações ordinárias (ON)</div><div class="kpi-value" id="comp-kpi-on">—</div><div class="kpi-sub" id="comp-kpi-on-sub">capital integralizado</div></div>
-          <div class="kpi-card"><div class="kpi-label"><i class="ti ti-circle-letter-p"></i> Ações preferenciais (PN)</div><div class="kpi-value" id="comp-kpi-pn">—</div><div class="kpi-sub" id="comp-kpi-pn-sub">capital integralizado</div></div>
-          <div class="kpi-card kpi-gold"><div class="kpi-label"><i class="ti ti-stack-2"></i> Total de ações</div><div class="kpi-value" id="comp-kpi-total">—</div><div class="kpi-sub" id="comp-kpi-cap-sub">capital social</div></div>
-          <div class="kpi-card kpi-success"><div class="kpi-label"><i class="ti ti-chart-donut"></i> Free float</div><div class="kpi-value" id="comp-kpi-ff">—</div><div class="kpi-sub" id="comp-kpi-ff-sub">ações em circulação</div></div>
-        </div>
+        <!-- Abas por domínio do dossiê -->
+        <div class="dossie-tabs app-hidden" id="comp-tabs"></div>
 
         <!-- Estado vazio / carregando -->
         <div class="dre-empty" id="comp-empty">
-          <i class="ti ti-chart-pie dre-empty-icon"></i>
-          <div id="comp-empty-msg">Selecione uma companhia para visualizar a composição de capital.</div>
+          <i class="ti ti-folders dre-empty-icon"></i>
+          <div id="comp-empty-msg">Selecione uma companhia para visualizar o dossiê FRE.</div>
         </div>
 
-        <!-- Conteúdo -->
-        <div id="comp-content" class="app-hidden">
-          <div class="table-card">
-            <div class="table-header">
-              <div class="table-title" id="comp-table-title">Capital Social</div>
-              <div class="table-count" id="comp-table-count">—</div>
-            </div>
-            <div class="table-wrap">
-              <table class="dre-table" id="comp-table">
-                <thead><tr id="comp-thead"></tr></thead>
-                <tbody id="comp-body"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Master/detail: tabela filha *_classe_acao -->
-          <div class="table-card app-hidden" id="comp-detalhe-card" style="margin-top:18px;">
-            <div class="table-header">
-              <div class="table-title" id="comp-det-title">Detalhe por classe de ação</div>
-              <div class="table-count" id="comp-det-count">—</div>
-            </div>
-            <div class="table-wrap">
-              <table class="dre-table" id="comp-det-table">
-                <thead><tr id="comp-det-thead"></tr></thead>
-                <tbody id="comp-det-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <!-- Corpo da aba (KPIs + gráficos + blocos + tabelas) -->
+        <div id="comp-tab-body" class="app-hidden"></div>
       </section>
 
       <!-- ===== IMPORTAÇÃO DE MODELOS ===== -->
@@ -892,7 +896,7 @@
 
         <div class="import-layout">
           <div>
-            <div class="import-step-label"><span class="import-step-num">1</span> Selecione o modelo</div>
+            <div class="import-step-label" id="import-step1-label"><span class="import-step-num">1</span> Selecione o modelo</div>
             <div class="model-grid" id="model-grid">
               <div class="model-empty"><i class="ti ti-loader-2 spin"></i> Carregando modelos...</div>
             </div>
@@ -912,6 +916,19 @@
               <button class="btn btn-ghost" id="btn-importar-reset"><i class="ti ti-eraser"></i> Limpar</button>
             </div>
           </div>
+        </div>
+
+        <!-- Fila de importação múltipla (FRE) -->
+        <div class="fre-queue app-hidden" id="fre-queue">
+          <div class="fre-queue-head">
+            <div class="fre-queue-title"><i class="ti ti-stack-2"></i> Fila de importação <span class="table-count" id="fre-queue-count">0 arquivo(s)</span></div>
+            <div class="fre-queue-actions">
+              <button class="btn btn-gold" id="btn-fre-importar" disabled><i class="ti ti-player-play"></i> Importar todos</button>
+              <button class="btn btn-ghost" id="btn-fre-limpar"><i class="ti ti-eraser"></i> Limpar fila</button>
+            </div>
+          </div>
+          <div class="fre-queue-summary" id="fre-queue-summary"></div>
+          <div class="fre-queue-list" id="fre-fila"></div>
         </div>
 
         <!-- Painel de progresso / resultado -->
@@ -1550,7 +1567,7 @@ document.getElementById('ms-save').addEventListener('click', async () => {
 });
 
 /* ---------- composição de capital (FRE) ---------- */
-const compState = { inited: false, empresa: null, anos: [], acItems: [], acActive: -1, acTimer: null };
+const compState = { inited: false, empresa: null, anos: [], acItems: [], acActive: -1, acTimer: null, dossie: null, tab: 'visao', charts: [], tabelasCache: {} };
 const COMP_HIDE = new Set(['CNPJ_Companhia', 'CNPJ_CIA', 'Nome_Companhia', 'DENOM_CIA', 'ID_Documento']);
 
 function compEsc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -1593,7 +1610,6 @@ function loadComposicao() {
   document.addEventListener('click', (e) => { if (!e.target.closest('#view-composicao .dre-search')) compFecharAc(); });
 
   document.getElementById('comp-ano').addEventListener('change', compPreencherVersoes);
-  document.getElementById('comp-modelo').addEventListener('change', () => { if (compState.empresa) compAnalisar(); });
   document.getElementById('btn-comp-analisar').addEventListener('click', compAnalisar);
 }
 
@@ -1676,117 +1692,267 @@ function compPreencherVersoes() {
 async function compAnalisar() {
   if (!compState.empresa) return;
   const cnpj = compState.empresa.cnpjNum;
-  const modelo = document.getElementById('comp-modelo').value;
   const ano = document.getElementById('comp-ano').value;
   const versao = document.getElementById('comp-versao').value;
 
-  compMostrarVazio('<i class="ti ti-loader-2 spin dre-empty-icon"></i><div>Carregando dados...</div>');
-  document.getElementById('comp-kpis').classList.add('app-hidden');
+  compMostrarVazio('<i class="ti ti-loader-2 spin dre-empty-icon"></i><div>Carregando dossiê FRE...</div>');
 
   const qs = new URLSearchParams();
   if (ano) qs.set('ano', ano);
   if (versao) qs.set('versao', versao);
 
   try {
-    const res = await authFetch(`api/fre/${encodeURIComponent(cnpj)}/modelo/${encodeURIComponent(modelo)}?${qs.toString()}`);
+    const res = await authFetch(`api/fre/${encodeURIComponent(cnpj)}/dossie?${qs.toString()}`);
     if (!res.ok) {
       const d = await parseJson(res);
-      compMostrarVazio(`<i class="ti ti-alert-triangle dre-empty-icon"></i><div>${(d && d.message) || 'Falha ao carregar o modelo.'}</div>`);
+      compMostrarVazio(`<i class="ti ti-alert-triangle dre-empty-icon"></i><div>${(d && d.message) || 'Falha ao carregar o dossiê.'}</div>`);
       return;
     }
-    const dados = await res.json();
-    compRenderCabecalho(dados, ano);
-    compRenderTabela(dados);
-    compRenderDetalhe(dados.detalhe);
+    compState.dossie = await res.json();
+    compState.tabelasCache = {};
+    compState.tab = 'visao';
+    compRenderCabecalho();
+    compRenderTabs();
     document.getElementById('comp-empty').style.display = 'none';
-    document.getElementById('comp-content').classList.remove('app-hidden');
-    compCarregarKpis(cnpj, ano);
+    document.getElementById('comp-tabs').classList.remove('app-hidden');
+    document.getElementById('comp-tab-body').classList.remove('app-hidden');
+    renderDossie('visao');
   } catch {
     compMostrarVazio('<i class="ti ti-plug-connected-x dre-empty-icon"></i><div>Sem conexão com o servidor.</div>');
   }
 }
 
-function compRenderCabecalho(dados, ano) {
-  const emp = compState.empresa;
-  document.getElementById('comp-co-name').textContent = emp.denominacao || '—';
+function compRenderCabecalho() {
+  const emp = compState.empresa, d = compState.dossie || {};
+  document.getElementById('comp-co-name').textContent = d.denominacao || emp.denominacao || '—';
   document.getElementById('comp-co-cnpj').textContent = formatDoc(emp.cnpjNum);
   document.getElementById('comp-co-cvm').textContent = emp.cdCvm || '—';
-  document.getElementById('comp-co-ano').textContent = ano || '—';
-  document.getElementById('comp-co-modelo').textContent = dados.descricao || prettyModelo(dados.modelo);
-  document.getElementById('comp-co-qtd').textContent = (dados.linhas || []).length;
-  document.getElementById('comp-co-template').innerHTML = `<i class="ti ${modeloIcon(dados.modelo)}"></i> ${prettyModelo(dados.modelo)}`;
+  document.getElementById('comp-co-ano').textContent = d.ano || '—';
+  document.getElementById('comp-co-versao').textContent = d.versao != null ? ('v' + d.versao) : '—';
+  document.getElementById('comp-co-qtd').textContent = (d.secoes || []).length + ' domínios';
+  document.getElementById('comp-co-template').innerHTML = '<i class="ti ti-folders"></i> Dossiê FRE';
   document.getElementById('comp-company').classList.add('show');
 }
 
-function compRenderTabela(dados) {
+/* ---------- abas do dossiê ---------- */
+const DOSSIE_TABS = [
+  { chave: 'visao',       rotulo: 'Visão Geral',  icon: 'ti-layout-dashboard' },
+  { chave: 'acionaria',   rotulo: 'Acionária',    icon: 'ti-chart-pie' },
+  { chave: 'governanca',  rotulo: 'Governança',   icon: 'ti-users' },
+  { chave: 'remuneracao', rotulo: 'Remuneração',  icon: 'ti-cash' },
+  { chave: 'empregados',  rotulo: 'Empregados',   icon: 'ti-users-group' },
+  { chave: 'exterior',    rotulo: 'Exterior',     icon: 'ti-world' },
+  { chave: 'partes',      rotulo: 'Partes Rel.',  icon: 'ti-arrows-exchange' },
+];
+
+// Mapa aba -> modelos FRE crus exibidos como tabelas detalhadas (via /modelo/{modelo}).
+const DOSSIE_BLOCOS = {
+  visao:       ['historico_emissor', 'responsavel'],
+  acionaria:   ['posicao_acionaria', 'distribuicao_capital'],
+  governanca:  ['administrador_membro_conselho_fiscal', 'membro_comite', 'auditor', 'relacao_familiar', 'relacao_subordinacao'],
+  remuneracao: ['remuneracao_total_orgao', 'remuneracao_maxima_minima_media', 'remuneracao_variavel'],
+  empregados:  ['empregado_local_faixa_etaria', 'empregado_declaracao_genero', 'empregado_declaracao_raca'],
+  exterior:    ['titulo_exterior', 'mercado_estrangeiro'],
+  partes:      ['transacao_parte_relacionada'],
+};
+
+function compRenderTabs() {
+  const bar = document.getElementById('comp-tabs');
+  bar.innerHTML = DOSSIE_TABS.map(t =>
+    `<div class="dossie-tab${t.chave === compState.tab ? ' active' : ''}" data-tab="${t.chave}"><i class="ti ${t.icon}"></i> ${t.rotulo}</div>`).join('');
+  bar.querySelectorAll('.dossie-tab').forEach(el =>
+    el.addEventListener('click', () => compTrocarAba(el.dataset.tab)));
+}
+
+function compTrocarAba(chave) {
+  if (chave === compState.tab) return;
+  compState.tab = chave;
+  document.querySelectorAll('#comp-tabs .dossie-tab').forEach(el =>
+    el.classList.toggle('active', el.dataset.tab === chave));
+  renderDossie(chave);
+}
+
+/* ---------- renderer dirigido por config ---------- */
+const DOSSIE_PALETA = ['#00C9BC', '#001E61', '#8FC73E', '#E8B400', '#15399A', '#3FE3D6', '#A2D460', '#1E5BB8', '#C53030', '#8893AB'];
+
+function dossieFmtKpi(kpi) {
+  if (kpi.formato === 'texto') return kpi.texto ? compEsc(kpi.texto) : '—';
+  if (kpi.valor === null || kpi.valor === undefined) return '—';
+  if (kpi.formato === 'moeda') return Number(kpi.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  if (kpi.formato === 'percent') return compFmtPct(kpi.valor);
+  return compFmtQtd(kpi.valor);
+}
+
+function dossieSerieTemDados(s) {
+  return (s.valores || []).some(v => (v.dados || []).some(x => Number(x || 0) !== 0));
+}
+
+function renderDossie(tab) {
+  dossieDestruirCharts();
+  const body = document.getElementById('comp-tab-body');
+  const secao = ((compState.dossie && compState.dossie.secoes) || []).find(s => s.chave === tab);
+  if (!secao) { body.innerHTML = '<div class="dossie-empty-mini">Sem dados para esta seção.</div>'; return; }
+
+  let html = '';
+
+  const kpis = secao.kpis || [];
+  if (kpis.length) {
+    html += '<div class="kpi-grid">' + kpis.map(k =>
+      `<div class="kpi-card"><div class="kpi-label"><i class="ti ti-${k.icone || 'point'}"></i> ${compEsc(k.rotulo)}</div><div class="kpi-value">${dossieFmtKpi(k)}</div></div>`).join('') + '</div>';
+  }
+
+  const series = (secao.series || []).filter(dossieSerieTemDados);
+  if (series.length) {
+    html += '<div class="dossie-section-title"><i class="ti ti-chart-histogram"></i> Visão analítica</div>';
+    html += '<div class="chart-grid">' + series.map((s, i) => {
+      const wide = s.tipo !== 'donut' && (s.categorias || []).length > 4;
+      return `<div class="chart-card${wide ? ' wide' : ''}"><h4>${compEsc(s.titulo)}</h4><div class="chart-canvas-wrap"><canvas id="dossie-canvas-${i}"></canvas></div></div>`;
+    }).join('') + '</div>';
+  }
+
+  const blocos = secao.blocos || [];
+  if (blocos.length) {
+    html += '<div class="dossie-section-title"><i class="ti ti-id"></i> Informações</div>';
+    html += '<div class="dossie-blocos">' + blocos.map(b =>
+      `<div class="info-card"><div class="ic-title"><i class="ti ti-${b.icone || 'info-circle'}"></i> ${compEsc(b.titulo)}</div>` +
+      (b.itens || []).map(it => `<div class="info-row"><span class="ir-l">${compEsc(it.rotulo)}</span><span class="ir-v">${it.valor ? compEsc(it.valor) : '—'}</span></div>`).join('') +
+      '</div>').join('') + '</div>';
+  }
+
+  if (!kpis.length && !series.length && !blocos.length) {
+    html += '<div class="dossie-empty-mini">Sem dados consolidados para este domínio na companhia/exercício selecionados.</div>';
+  }
+
+  // Tabelas detalhadas brutas (reuso de /modelo/{modelo}).
+  const tabelas = DOSSIE_BLOCOS[tab] || [];
+  if (tabelas.length) {
+    html += '<div class="dossie-section-title"><i class="ti ti-table"></i> Tabelas detalhadas</div>';
+    html += tabelas.map(m => `<div id="dossie-tab-${m}" style="margin-bottom:16px;"></div>`).join('');
+  }
+
+  body.innerHTML = html;
+
+  // Cria os gráficos somente após os canvases existirem no DOM.
+  series.forEach((s, i) => {
+    const cv = document.getElementById('dossie-canvas-' + i);
+    if (cv) dossieCriarGrafico(cv, s);
+  });
+
+  // Carrega as tabelas cruas sob demanda.
+  tabelas.forEach(m => compCarregarTabela(m, document.getElementById('dossie-tab-' + m)));
+}
+
+/* ---------- helpers Chart.js (tema Austral) ---------- */
+function dossieDestruirCharts() {
+  (compState.charts || []).forEach(c => { try { c.destroy(); } catch {} });
+  compState.charts = [];
+}
+
+function dossieFmtTick(v) { return Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 }); }
+
+function dossieCriarGrafico(canvas, serie) {
+  if (typeof Chart === 'undefined') return;
+  if (serie.tipo === 'donut') return dossieDonut(canvas, serie);
+  if (serie.tipo === 'barras_empilhadas') return dossieBarras(canvas, serie, { stacked: true });
+  if (serie.tipo === 'barras_horizontais') return dossieBarras(canvas, serie, { horizontal: true });
+  return dossieBarras(canvas, serie, {});
+}
+
+function dossieDonut(canvas, serie) {
+  const dados = ((serie.valores[0] && serie.valores[0].dados) || []).map(v => Number(v || 0));
+  const chart = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels: serie.categorias, datasets: [{ data: dados, backgroundColor: DOSSIE_PALETA, borderColor: '#fff', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      plugins: {
+        legend: { position: 'right', labels: { font: { family: 'DM Sans', size: 12 }, color: '#475173', usePointStyle: true, boxWidth: 8 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${dossieFmtTick(ctx.parsed)}` } },
+      },
+    },
+  });
+  compState.charts.push(chart);
+}
+
+function dossieBarras(canvas, serie, opts) {
+  const horizontal = !!opts.horizontal, stacked = !!opts.stacked;
+  const datasets = (serie.valores || []).map((v, i) => ({
+    label: v.rotulo,
+    data: (v.dados || []).map(x => Number(x || 0)),
+    backgroundColor: DOSSIE_PALETA[i % DOSSIE_PALETA.length],
+    borderRadius: 4, borderSkipped: false, maxBarThickness: 48,
+  }));
+  const single = datasets.length <= 1;
+  const chart = new Chart(canvas, {
+    type: 'bar',
+    data: { labels: serie.categorias, datasets },
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: !single, position: 'bottom', labels: { font: { family: 'DM Sans', size: 12 }, color: '#475173', usePointStyle: true, boxWidth: 8 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${dossieFmtTick(ctx.parsed[horizontal ? 'x' : 'y'])}` } },
+      },
+      scales: {
+        x: { stacked, grid: { display: horizontal, color: 'rgba(0,30,97,0.06)' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#8893AB', callback: horizontal ? (v => dossieFmtTick(v)) : undefined } },
+        y: { stacked, grid: { display: !horizontal, color: 'rgba(0,30,97,0.06)' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#8893AB', callback: horizontal ? undefined : (v => dossieFmtTick(v)) } },
+      },
+    },
+  });
+  compState.charts.push(chart);
+}
+
+/* ---------- tabelas detalhadas (reuso de /modelo/{modelo}) ---------- */
+async function compCarregarTabela(modelo, container) {
+  if (!container) return;
+  const cnpj = compState.empresa.cnpjNum;
+  const ano = compState.dossie.ano || '';
+  const versao = compState.dossie.versao || '';
+  const cacheKey = `${cnpj}|${ano}|${versao}|${modelo}`;
+
+  container.innerHTML = `<div class="table-card"><div class="table-header"><div class="table-title"><i class="ti ${modeloIcon(modelo)}"></i> ${prettyModelo(modelo)}</div><div class="table-count"><i class="ti ti-loader-2 spin"></i> carregando...</div></div></div>`;
+
+  let dados = compState.tabelasCache[cacheKey];
+  if (!dados) {
+    const qs = new URLSearchParams();
+    if (ano) qs.set('ano', ano);
+    if (versao) qs.set('versao', versao);
+    try {
+      const res = await authFetch(`api/fre/${encodeURIComponent(cnpj)}/modelo/${encodeURIComponent(modelo)}?${qs.toString()}`);
+      if (!res.ok) { container.innerHTML = compTabelaErro(modelo, 'Falha ao carregar a tabela.'); return; }
+      dados = await res.json();
+      compState.tabelasCache[cacheKey] = dados;
+    } catch { container.innerHTML = compTabelaErro(modelo, 'Sem conexão com o servidor.'); return; }
+  }
+  container.innerHTML = compTabelaHTML(dados) + (dados.detalhe ? compTabelaHTML(dados.detalhe, true) : '');
+}
+
+function compTabelaErro(modelo, msg) {
+  return `<div class="table-card"><div class="table-header"><div class="table-title"><i class="ti ${modeloIcon(modelo)}"></i> ${prettyModelo(modelo)}</div></div><div class="table-wrap"><table class="dre-table"><tbody><tr class="table-state error"><td><i class="ti ti-alert-triangle state-icon"></i>${msg}</td></tr></tbody></table></div></div>`;
+}
+
+function compTabelaHTML(dados, detalhe) {
   const cols = (dados.colunas || []).filter(c => !COMP_HIDE.has(c.nome));
-  const thead = document.getElementById('comp-thead');
-  const body = document.getElementById('comp-body');
-  document.getElementById('comp-table-title').textContent = dados.descricao || prettyModelo(dados.modelo);
-  document.getElementById('comp-table-count').textContent = `${(dados.linhas || []).length} registro(s)`;
-
-  thead.innerHTML = cols.map(c =>
-    `<th${compNumKind(c.kind) ? ' class="col-num"' : ''}>${compEsc(prettyModelo(c.nome))}</th>`).join('');
-
-  if (!(dados.linhas || []).length) {
-    body.innerHTML = `<tr><td colspan="${cols.length || 1}" style="text-align:center;color:var(--text-muted);padding:18px;">Sem dados para o filtro selecionado.</td></tr>`;
-    return;
+  const linhas = dados.linhas || [];
+  const titulo = dados.descricao || prettyModelo(dados.modelo);
+  const sub = detalhe && dados.joinKey ? ` · agrupado por ${prettyModelo(dados.joinKey)}` : '';
+  let h = `<div class="table-card"${detalhe ? ' style="margin-top:14px;"' : ''}><div class="table-header"><div class="table-title"><i class="ti ${detalhe ? 'ti-stack-2' : modeloIcon(dados.modelo)}"></i> ${compEsc(titulo)}</div><div class="table-count">${linhas.length} registro(s)${sub}</div></div><div class="table-wrap"><table class="dre-table"><thead><tr>`;
+  h += cols.map(c => `<th${compNumKind(c.kind) ? ' class="col-num"' : ''}>${compEsc(prettyModelo(c.nome))}</th>`).join('');
+  h += '</tr></thead><tbody>';
+  if (!linhas.length) {
+    h += `<tr><td colspan="${cols.length || 1}" style="text-align:center;color:var(--text-muted);padding:18px;">Sem dados para o filtro selecionado.</td></tr>`;
+  } else {
+    h += linhas.map(row => '<tr>' + cols.map(c =>
+      `<td${compNumKind(c.kind) ? ' style="text-align:right;font-family:\'DM Mono\',monospace;"' : ''}>${compFmtVal(row[c.nome], c.kind)}</td>`).join('') + '</tr>').join('');
   }
-  body.innerHTML = dados.linhas.map(row =>
-    '<tr>' + cols.map(c =>
-      `<td${compNumKind(c.kind) ? ' style="text-align:right;font-family:\'DM Mono\',monospace;"' : ''}>${compFmtVal(row[c.nome], c.kind)}</td>`).join('') + '</tr>'
-  ).join('');
-}
-
-function compRenderDetalhe(det) {
-  const card = document.getElementById('comp-detalhe-card');
-  if (!det) { card.classList.add('app-hidden'); return; }
-  card.classList.remove('app-hidden');
-
-  const cols = (det.colunas || []).filter(c => !COMP_HIDE.has(c.nome));
-  document.getElementById('comp-det-title').textContent = det.descricao || 'Detalhe por classe de ação';
-  document.getElementById('comp-det-count').textContent =
-    `${(det.linhas || []).length} registro(s)${det.joinKey ? ' · agrupado por ' + prettyModelo(det.joinKey) : ''}`;
-
-  document.getElementById('comp-det-thead').innerHTML = cols.map(c =>
-    `<th${compNumKind(c.kind) ? ' class="col-num"' : ''}>${compEsc(prettyModelo(c.nome))}</th>`).join('');
-
-  const body = document.getElementById('comp-det-body');
-  if (!(det.linhas || []).length) {
-    body.innerHTML = `<tr><td colspan="${cols.length || 1}" style="text-align:center;color:var(--text-muted);padding:18px;">Sem detalhe por classe de ação.</td></tr>`;
-    return;
-  }
-  body.innerHTML = det.linhas.map(row =>
-    '<tr>' + cols.map(c =>
-      `<td${compNumKind(c.kind) ? ' style="text-align:right;font-family:\'DM Mono\',monospace;"' : ''}>${compFmtVal(row[c.nome], c.kind)}</td>`).join('') + '</tr>'
-  ).join('');
-}
-
-async function compCarregarKpis(cnpj, ano) {
-  const grid = document.getElementById('comp-kpis');
-  try {
-    const res = await authFetch(`api/fre/${encodeURIComponent(cnpj)}/capital-resumo${ano ? '?ano=' + ano : ''}`);
-    if (!res.ok) { grid.classList.add('app-hidden'); return; }
-    const linhas = await res.json();
-    const r = (linhas || []).find(x => !ano || String(x.ano) === String(ano)) || (linhas || [])[0];
-    if (!r) { grid.classList.add('app-hidden'); return; }
-    document.getElementById('comp-kpi-on').textContent = compFmtQtd(r.acoesOrdinarias);
-    document.getElementById('comp-kpi-pn').textContent = compFmtQtd(r.acoesPreferenciais);
-    document.getElementById('comp-kpi-total').textContent = compFmtQtd(r.acoesTotal);
-    document.getElementById('comp-kpi-cap-sub').textContent = r.valorCapital != null
-      ? 'Capital: ' + Number(r.valorCapital).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-      : 'capital social';
-    document.getElementById('comp-kpi-ff').textContent = compFmtPct(r.percentualFreeFloat);
-    document.getElementById('comp-kpi-ff-sub').textContent = r.acoesCirculacao != null
-      ? compFmtQtd(r.acoesCirculacao) + ' ações em circulação'
-      : 'ações em circulação';
-    grid.classList.remove('app-hidden');
-  } catch { grid.classList.add('app-hidden'); }
+  h += '</tbody></table></div></div>';
+  return h;
 }
 
 function compMostrarVazio(html) {
-  document.getElementById('comp-content').classList.add('app-hidden');
-  document.getElementById('comp-kpis').classList.add('app-hidden');
+  document.getElementById('comp-tab-body').classList.add('app-hidden');
+  document.getElementById('comp-tabs').classList.add('app-hidden');
+  dossieDestruirCharts();
   const empty = document.getElementById('comp-empty');
   empty.style.display = 'block';
   empty.innerHTML = html;
@@ -1858,8 +2024,12 @@ function modelosCacheKey() { return importBase === 'FRE' ? 'FRE' : 'DFP'; }
 function atualizarDicaImport() {
   const hint = document.querySelector('#import-dropzone .dz-hint');
   if (!hint) return;
+  const title = document.querySelector('#import-dropzone .dz-title');
+  if (title) title.innerHTML = importBase === 'FRE'
+    ? 'Arraste vários arquivos aqui ou <span class="dz-link">clique para selecionar</span>'
+    : 'Arraste o arquivo aqui ou <span class="dz-link">clique para selecionar</span>';
   hint.textContent = importBase === 'FRE'
-    ? 'CSV da CVM no formato fre_cia_aberta_<modelo>_AAAA.csv (separador “;”, ISO-8859-1)'
+    ? 'Vários CSVs da CVM (fre_cia_aberta_<modelo>_AAAA.csv) — separador “;”, ISO-8859-1'
     : 'Apenas arquivos .csv da CVM (separador “;”, codificação ISO-8859-1)';
 }
 
@@ -1871,9 +2041,24 @@ document.getElementById('import-base').addEventListener('change', (e) => {
   if (trocouCategoria || (importBase === 'ITR' && modeloSelecionado && modeloSelecionado !== 'DRE'))
     resetImportForm();
   atualizarDicaImport();
+  aplicarModoImport();
   loadModelos();
   carregarHistorico();
 });
+
+// Alterna a UI de importação entre o fluxo de arquivo único (DFP/ITR) e a fila múltipla (FRE).
+function aplicarModoImport() {
+  const isFre = importBase === 'FRE';
+  importFile.multiple = isFre;
+  document.getElementById('fre-queue').classList.toggle('app-hidden', !isFre);
+  const acts = document.querySelector('#view-importacao .import-actions');
+  if (acts) acts.style.display = isFre ? 'none' : '';
+  const step1 = document.getElementById('import-step1-label');
+  if (step1) step1.innerHTML = isFre
+    ? '<span class="import-step-num">1</span> Modelos disponíveis (detecção automática)'
+    : '<span class="import-step-num">1</span> Selecione o modelo';
+  if (isFre) freRenderFila();
+}
 
 function fmtBytes(b) {
   if (b == null) return '0 B';
@@ -1912,7 +2097,17 @@ function renderModelos() {
     grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível.</div>';
     return;
   }
-  // ITR (trimestral) so importa DRE; DFP (anual) e FRE mostram todos os seus modelos.
+  // FRE importa vários arquivos de uma vez; o modelo é detectado pelo nome de cada arquivo.
+  if (importBase === 'FRE') {
+    grid.innerHTML = cache.map(m =>
+      `<div class="model-card" title="${m.descricao || ''}" style="cursor:default;">
+        <div class="mc-icon"><i class="ti ${modeloIcon(m.tipo)}"></i></div>
+        <div class="mc-name">${prettyModelo(m.tipo)}</div>
+        <div class="mc-desc">${m.descricao || m.tipo}</div>
+      </div>`).join('');
+    return;
+  }
+  // ITR (trimestral) so importa DRE; DFP (anual) mostra todos os seus modelos.
   const lista = importBase === 'ITR' ? cache.filter(m => m.tipo === 'DRE') : cache;
   if (!lista.length) {
     grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível para esta base.</div>';
@@ -1946,10 +2141,16 @@ function atualizarBotaoImportar() {
 const dropzone = document.getElementById('import-dropzone');
 const importFile = document.getElementById('import-file');
 dropzone.addEventListener('click', () => importFile.click());
-importFile.addEventListener('change', () => { if (importFile.files.length) setArquivo(importFile.files[0]); });
+importFile.addEventListener('change', () => { if (importFile.files.length) handleFilesSelecionados(importFile.files); importFile.value = ''; });
 ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
 ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
-dropzone.addEventListener('drop', e => { if (e.dataTransfer.files.length) setArquivo(e.dataTransfer.files[0]); });
+dropzone.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleFilesSelecionados(e.dataTransfer.files); });
+
+// DFP/ITR usam um único arquivo; FRE acumula vários na fila.
+function handleFilesSelecionados(list) {
+  if (importBase === 'FRE') freAddFiles(list);
+  else setArquivo(list[0]);
+}
 
 function setArquivo(file) {
   if (!/\.csv$/i.test(file.name)) { toast('Selecione um arquivo .csv válido.', true); return; }
@@ -2099,6 +2300,161 @@ document.getElementById('btn-importar-novo').addEventListener('click', () => {
   importJobId = null;
   document.getElementById('import-progress').className = 'import-progress';
   resetImportForm();
+});
+
+/* ---------- importação múltipla (FRE) ---------- */
+let freFila = [];                 // [{ file, name, size, tipo, status, percent, linhas, tabela, jobId, msg }]
+let freImportando = false;
+const FRE_POOL = 3;               // nº de arquivos importados simultaneamente
+const freSleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Detecta o modelo FRE pelo nome do arquivo (espelha FreModeloRegistry.IdentificarPorArquivo).
+function freDetectarTipo(nome) {
+  const tipos = modelosCache['FRE'];
+  let n = String(nome || '').toLowerCase().replace(/\.[^.]+$/, '');
+  const pref = 'fre_cia_aberta';
+  if (!n.startsWith(pref)) return null;
+  let resto = n.slice(pref.length).replace(/^_+|_+$/g, '');
+  const mSuf = /_((?:19|20)\d{2})$/.exec(resto);
+  if (mSuf) resto = resto.slice(0, mSuf.index);
+  else if (/^(?:19|20)\d{2}$/.test(resto)) resto = '';
+  if (resto === '') return 'DOCUMENTO';
+  if (!tipos) return resto; // catálogo ainda não carregado: assume o nome cru; o backend valida
+  const hit = tipos.find(t => String(t.tipo).toLowerCase() === resto);
+  return hit ? hit.tipo : null;
+}
+
+function freAddFiles(list) {
+  let ign = 0;
+  for (const file of list) {
+    if (!/\.csv$/i.test(file.name)) { ign++; continue; }
+    if (freFila.some(f => f.name === file.name && f.size === file.size)) continue;
+    freFila.push({
+      file, name: file.name, size: file.size,
+      tipo: freDetectarTipo(file.name),
+      status: 'pendente', percent: 0, linhas: 0, tabela: null, jobId: null, msg: null,
+    });
+  }
+  freRenderFila();
+  if (ign) toast(`${ign} arquivo(s) ignorado(s): selecione apenas .csv.`, true);
+}
+
+const FRE_ST_ICON = { pendente: 'ti-clock', enviando: 'ti-upload', processando: 'ti-loader-2 spin', concluido: 'ti-circle-check', falha: 'ti-circle-x', cancelado: 'ti-ban' };
+const FRE_ST_LABEL = { pendente: 'Na fila', enviando: 'Enviando', processando: 'Processando', concluido: 'Concluído', falha: 'Falha', cancelado: 'Cancelado' };
+
+function freRenderFila() {
+  const wrap = document.getElementById('fre-fila');
+  if (!wrap) return;
+  document.getElementById('fre-queue-count').textContent = `${freFila.length} arquivo(s)`;
+  const importaveis = freFila.filter(f => f.tipo && (f.status === 'pendente' || f.status === 'falha'));
+  document.getElementById('btn-fre-importar').disabled = freImportando || importaveis.length === 0;
+  document.getElementById('btn-fre-limpar').disabled = freImportando;
+
+  if (!freFila.length) {
+    wrap.innerHTML = '<div class="fre-empty">Nenhum arquivo na fila. Arraste vários CSVs do FRE na área acima — o modelo de cada um é detectado pelo nome.</div>';
+    return;
+  }
+  wrap.innerHTML = freFila.map((f, i) => {
+    const modelHtml = f.tipo
+      ? `<span class="fr-model">${compEsc(prettyModelo(f.tipo))}</span>`
+      : `<span class="fr-model unknown" title="Nome de arquivo não reconhecido">não reconhecido</span>`;
+    const icon = FRE_ST_ICON[f.status] || 'ti-point';
+    const label = FRE_ST_LABEL[f.status] || f.status;
+    const removivel = !freImportando && (f.status === 'pendente' || f.status === 'falha' || f.status === 'concluido' || f.status === 'cancelado');
+    const sub = `${fmtBytes(f.size)}`
+      + (f.linhas ? ` · ${f.linhas.toLocaleString('pt-BR')} linhas` : '')
+      + (f.tabela ? ` · ${compEsc(f.tabela)}` : '')
+      + (f.status === 'falha' && f.msg ? ` · ${compEsc(f.msg)}` : '');
+    return `<div class="fre-row">
+      <div><div class="fr-file">${compEsc(f.name)}</div><div class="fr-sub">${sub}</div></div>
+      <div>${modelHtml}</div>
+      <div><div class="fre-bar"><span style="width:${f.percent || 0}%"></span></div></div>
+      <div><span class="fre-st ${f.status}"><i class="ti ${icon}"></i> ${label}</span>${removivel ? ` <i class="ti ti-x fr-remove" data-i="${i}" title="Remover da fila"></i>` : ''}</div>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.fr-remove').forEach(el =>
+    el.addEventListener('click', () => { freFila.splice(+el.dataset.i, 1); freRenderFila(); }));
+}
+
+function freAtualizarResumo() {
+  const sum = document.getElementById('fre-queue-summary');
+  if (!sum) return;
+  if (!freImportando) { sum.classList.remove('show'); return; }
+  const total = freFila.length;
+  const fim = freFila.filter(f => ['concluido', 'falha', 'cancelado'].includes(f.status)).length;
+  const ok = freFila.filter(f => f.status === 'concluido').length;
+  sum.classList.add('show');
+  sum.innerHTML = `<i class="ti ti-loader-2 spin"></i> Importando… ${fim}/${total} finalizados · ${ok} concluído(s)`;
+}
+
+async function freImportarUm(item) {
+  try {
+    item.status = 'enviando'; item.percent = 0; item.msg = null; freRenderFila();
+    const fd = new FormData();
+    fd.append('arquivo', item.file);
+    const res = await authFetch(`api/fre/importar/${encodeURIComponent(item.tipo)}`, { method: 'POST', body: fd });
+    const d = await parseJson(res);
+    if (!res.ok) { item.status = 'falha'; item.msg = d.message || 'Falha ao iniciar.'; freRenderFila(); return; }
+    item.jobId = d.jobId; item.status = 'processando'; freRenderFila();
+    while (true) {
+      await freSleep(800);
+      const sres = await authFetch(`api/fre/importar/status/${encodeURIComponent(item.jobId)}`);
+      if (!sres.ok) { item.status = 'falha'; item.msg = 'Status indisponível.'; freRenderFila(); return; }
+      const s = await sres.json();
+      item.percent = s.percentual || 0;
+      item.linhas = s.linhasImportadas || 0;
+      item.tabela = s.tabela || item.tabela;
+      if (['Concluido', 'Falha', 'Cancelado'].includes(s.status)) {
+        item.status = s.status.toLowerCase();
+        item.msg = s.mensagem || null;
+        if (item.status === 'concluido') item.percent = 100;
+        freRenderFila();
+        return;
+      }
+      freRenderFila();
+      freAtualizarResumo();
+    }
+  } catch {
+    item.status = 'falha'; item.msg = 'Falha de conexão.'; freRenderFila();
+  }
+}
+
+async function freImportarTodos() {
+  if (freImportando) return;
+  if (!modelosCache['FRE']) await loadModelos();   // garante o catálogo p/ revalidar a detecção
+  freFila.forEach(f => { if (f.tipo && f.status === 'falha') f.status = 'pendente'; });
+  const pendentes = freFila.filter(f => f.tipo && f.status === 'pendente');
+  if (!pendentes.length) { toast('Nenhum arquivo reconhecido para importar.', true); return; }
+
+  freImportando = true;
+  freRenderFila(); freAtualizarResumo();
+  let idx = 0;
+  const worker = async () => {
+    while (idx < pendentes.length) {
+      const item = pendentes[idx++];
+      await freImportarUm(item);
+      freAtualizarResumo();
+    }
+  };
+  try {
+    await Promise.all(Array.from({ length: Math.min(FRE_POOL, pendentes.length) }, worker));
+  } finally {
+    freImportando = false;
+    freRenderFila();
+    freAtualizarResumo();
+    const ok = freFila.filter(f => f.status === 'concluido').length;
+    const falhas = freFila.filter(f => f.status === 'falha').length;
+    toast(`Importação concluída: ${ok} ok${falhas ? `, ${falhas} com falha` : ''}.`, falhas > 0);
+    carregarHistorico();
+  }
+}
+
+document.getElementById('btn-fre-importar').addEventListener('click', freImportarTodos);
+document.getElementById('btn-fre-limpar').addEventListener('click', () => {
+  if (freImportando) return;
+  freFila = [];
+  freRenderFila();
+  document.getElementById('fre-queue-summary').classList.remove('show');
 });
 
 /* ---------- histórico de importações ---------- */

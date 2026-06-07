@@ -17,6 +17,7 @@ public class FreController : ControllerBase
 {
     private readonly IDfpImportJobManager _jobs;
     private readonly IFreRepository _repository;
+    private readonly IFreDossieRepository _dossie;
     private readonly ISqlConnectionFactory _factory;
     private readonly ISchemaInitializer _schema;
     private readonly IWebHostEnvironment _environment;
@@ -25,6 +26,7 @@ public class FreController : ControllerBase
     public FreController(
         IDfpImportJobManager jobs,
         IFreRepository repository,
+        IFreDossieRepository dossie,
         ISqlConnectionFactory factory,
         ISchemaInitializer schema,
         IWebHostEnvironment environment,
@@ -32,6 +34,7 @@ public class FreController : ControllerBase
     {
         _jobs = jobs;
         _repository = repository;
+        _dossie = dossie;
         _factory = factory;
         _schema = schema;
         _environment = environment;
@@ -167,6 +170,15 @@ public class FreController : ControllerBase
     [HttpGet("{cnpj}/capital-resumo")]
     public Task<IActionResult> CapitalResumo(string cnpj, [FromQuery] int? ano, CancellationToken ct)
         => Run(async () => Ok(await _repository.GetCapitalResumoAsync(cnpj, ano, ct)), ct);
+
+    /// <summary>
+    /// Dossie FRE consolidado da companhia (KPIs/series/blocos por dominio) para a tela
+    /// premium em abas. Filtros opcionais: <c>ano</c> (padrao: mais recente) e <c>versao</c>
+    /// (padrao: maior versao do ano).
+    /// </summary>
+    [HttpGet("{cnpj}/dossie")]
+    public Task<IActionResult> Dossie(string cnpj, [FromQuery] int? ano, [FromQuery] int? versao, CancellationToken ct)
+        => Run(async () => Ok(await _dossie.GetDossieAsync(cnpj, ano, versao, ct)), ct);
 
     /// <summary>Garante conexao + schema e padroniza o tratamento de erros das acoes.</summary>
     private async Task<IActionResult> Run(Func<Task<IActionResult>> action, CancellationToken ct)

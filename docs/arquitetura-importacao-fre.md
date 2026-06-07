@@ -19,8 +19,10 @@ flowchart TD
     core --> reg["FreModeloRegistry.Resolver(tipo)"]
     core --> tbl[("fre.&lt;Modelo&gt;")]
     core --> led[("fre.Importacao")]
+    tbl --> dos["FreDossieRepository GET\n/api/fre/{cnpj}/dossie\n(agrega por dominio)"]
     tbl --> read["FreController GET\n/api/fre/{cnpj}/modelo/{modelo}"]
-    read --> ui["Secao premium\n'Composicao Capital'"]
+    dos --> ui["Tela premium 'Dossie FRE'\n(abas + KPIs + graficos)"]
+    read --> ui
 ```
 
 ---
@@ -35,7 +37,8 @@ flowchart TD
 | Ledger | `fre.Importacao` | `CvmImportacaoLog` (parametrizado pela tabela) |
 | Registry de modelos | `FreModeloRegistry` (~50 modelos) | `DfpColumn`/`DfpColumnKind`/`DfpDemonstracao` |
 | Job manager | `DfpImportJobManager` (despacha por `Base`) | `IDfpImportJobManager` |
-| Leitura | `FreRepository` | — |
+| Leitura (modelos brutos) | `FreRepository` | — |
+| Leitura (dossiê agregado) | `FreDossieRepository` | — |
 
 O descritor que isola FRE (`backend/Services/CvmDataset.cs`):
 
@@ -205,15 +208,36 @@ Todos os modelos são `TemConjunto:false`. A chave (`tipo`) é o nome enviado em
 | GET | `/{cnpj}/anos` | Anos de referência (+ maior versão) |
 | GET | `/{cnpj}/modelo/{modelo}?ano=&versao=` | Linhas do modelo + detalhe master/detail (`*_classe_acao`) |
 | GET | `/{cnpj}/capital-resumo?ano=` | KPIs ON/PN/total/free float (`fre.vw_CapitalResumo`) |
+| GET | `/{cnpj}/dossie?ano=&versao=` | Dossiê consolidado por domínio (KPIs/séries/blocos) para a tela em abas |
 
 O **master/detail** é resolvido em `FreRepository`: quando existe um modelo `<modelo>_classe_acao`, suas linhas são trazidas e o `joinKey` (a coluna `ID_*` compartilhada, exceto `ID_Documento`) é informado para o frontend agrupar.
+
+### Endpoint de dossiê (`/{cnpj}/dossie`)
+
+`FreDossieRepository.GetDossieAsync` resolve o **ano** (mais recente quando omitido) e a **versão** (maior versão do ano quando omitida) a partir de `fre.Documento` e, em seguida, agrega os dados por domínio com SQL parametrizado (`@cnpjNum`, `@ano`, `@versao`). Os nomes de tabela/coluna são literais de código e os valores são sempre parametrizados (mesma postura de segurança do `FreRepository`).
+
+A resposta é um DTO **genérico** (`backend/Models/Fre/FreDossieModels.cs`) — `FreDossie { secoes[] }`, onde cada `FreDossieSecao` carrega `kpis[]` (rótulo/valor/formato), `series[]` (`donut` | `barras` | `barras_empilhadas` | `barras_horizontais`, com `categorias[]` + `valores[]`) e `blocos[]` (cards rótulo/valor). Seções (`chave`):
+
+| Seção | Agregações |
+|---|---|
+| `visao` | KPIs gerais (nº administradores, auditores, remuneração total, partes relacionadas, free float) + bloco do histórico do emissor |
+| `acionaria` | KPIs ON/PN/total/free float (`vw_CapitalResumo`) + donut da posição acionária por acionista + donut PF/PJ/institucional |
+| `governanca` | gênero e raça por órgão (barras empilhadas), KPIs de conselho fiscal/comitês/participação, bloco do auditor + responsável, relações familiares/subordinação (barras horizontais) |
+| `remuneracao` | composição por órgão (barras empilhadas), maior/médio/menor por órgão (barras), KPI total |
+| `empregados` | faixa etária por local (barras empilhadas), gênero (donut), raça por classe (barras empilhadas) |
+| `exterior` | KPIs de títulos/mercados + listagens por país de negociação (barras) |
+| `partes` | KPIs montante/contagem + top-N por parte relacionada (barras horizontais) |
 
 ---
 
 ## 7. Frontend
 
 - **Importação de Modelos**: a base `FRE` aparece no seletor; `loadModelos()` consome `api/fre/tipos` (DFP/ITR seguem usando `api/dfp/tipos`), com cache por base e dica de nomenclatura `fre_cia_aberta_<modelo>_AAAA.csv`.
-- **Composição Capital** (seção premium em "Análise"): seletor de modelo do grupo de capital, autocomplete de empresa (`api/fre/empresas`), exercício/versão (`api/fre/{cnpj}/anos`), render mestre + detalhe por classe de ação e KPIs (ON/PN, total e free float via `api/fre/{cnpj}/capital-resumo`).
+- **Dossiê FRE** (seção premium em "Análise", `view-composicao` no `index.html`): autocomplete de empresa (`api/fre/empresas`), exercício/versão (`api/fre/{cnpj}/anos`) e **barra de abas por domínio** (Visão Geral · Acionária · Governança · Remuneração · Empregados · Exterior · Partes Rel.).
+  - **Carregamento**: "Analisar" faz **uma** chamada a `api/fre/{cnpj}/dossie` e guarda o resultado em `compState.dossie`; trocar de aba apenas re-renderiza (sem novo fetch).
+  - **Renderer dirigido por config** (`renderDossie` + `DOSSIE_TABS`/`DOSSIE_BLOCOS`): para a seção da aba, monta a grade de KPIs, um card de gráfico por série e cards de informação (blocos), escolhendo o melhor visual por item.
+  - **Gráficos Chart.js** (CDN, tema Austral): `dossieDonut` e `dossieBarras` (vertical/horizontal/empilhada); as instâncias anteriores são destruídas (`dossieDestruirCharts`) a cada render para evitar leaks.
+  - **Tabelas detalhadas brutas**: cada aba lista, sob demanda, os modelos crus relevantes via `api/fre/{cnpj}/modelo/{modelo}` (com cache em `compState.tabelasCache`), reaproveitando o render mestre + detalhe (`*_classe_acao`).
 
 ---
 
@@ -225,6 +249,9 @@ O **master/detail** é resolvido em `FreRepository`: quando existe um modelo `<m
 | `backend/Services/CvmDataset.cs` | Descritor `CvmDatasets.Fre` |
 | `backend/Services/FreImportService.cs` / `IFreImportService.cs` | Adaptador fino sobre `CvmCsvImporter` |
 | `backend/Services/FreRepository.cs` / `IFreRepository.cs` | Leitura dos modelos + master/detail + resumo de capital |
+| `backend/Services/FreDossieRepository.cs` / `IFreDossieRepository.cs` | Agregação por domínio para o dossiê (`/{cnpj}/dossie`) |
 | `backend/Controllers/FreController.cs` | Endpoints `/api/fre` |
 | `backend/Models/Fre/FreModels.cs` | DTOs de leitura (empresa, ano, modelo, detalhe, resumo) |
+| `backend/Models/Fre/FreDossieModels.cs` | DTOs genéricos do dossiê (seção, KPI, série, bloco) |
+| `index.html` / `backend/wwwroot/index.html` | Tela "Dossiê FRE" (abas + gráficos Chart.js); cópias idênticas |
 | `backend/Migrations/V013..V019` | Schema `fre`, ~50 tabelas e views de capital |

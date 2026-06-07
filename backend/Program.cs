@@ -66,6 +66,7 @@ builder.Services.AddScoped<IDreComparativoService, DreComparativoService>();
 // FRE (CVM, Formulario de Referencia): importacao dos ~50 modelos (schema [fre]) + leitura do grupo de capital.
 builder.Services.AddScoped<IFreImportService, FreImportService>();
 builder.Services.AddScoped<IFreRepository, FreRepository>();
+builder.Services.AddScoped<IFreDossieRepository, FreDossieRepository>();
 
 // Autenticacao/permissionamento: usuarios, perfis e log de atividades no proprio banco.
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();

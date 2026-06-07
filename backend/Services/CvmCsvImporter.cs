@@ -139,8 +139,12 @@ public class CvmCsvImporter
                 bulk.ColumnMappings.Add(name, name);
 
             // 2. Processa a primeira linha em buffer (se houver) + o restante do arquivo.
+            // O buffer (primeiraLinha) so e preenchido quando TemConjunto (espiamos a 1a linha
+            // de dados para detectar CON/IND). Sem buffer (ex.: FRE e os tipos DFP sem GRUPO_DFP),
+            // a primeira iteracao deve ler direto do reader; caso contrario o laco quebraria
+            // imediatamente (line == null) e nenhuma linha seria importada.
             var line = primeiraLinha;
-            var primeira = true;
+            var primeira = primeiraLinha is not null;
             while (true)
             {
                 if (!primeira)
