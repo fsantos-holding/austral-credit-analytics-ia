@@ -26,13 +26,14 @@ public sealed class DfpImportJobManager : IDfpImportJobManager
     }
 
     public DfpImportJob Iniciar(
-        string tipo, string modelo, string tabela, string arquivo, string caminhoTemp,
+        string baseDados, string tipo, string modelo, string tabela, string arquivo, string caminhoTemp,
         long bytesTotais, string? usuario)
     {
         LimparAntigos();
 
         var job = new DfpImportJob
         {
+            Base = string.IsNullOrWhiteSpace(baseDados) ? "DFP" : baseDados.Trim().ToUpperInvariant(),
             Tipo = tipo,
             Modelo = modelo,
             Tabela = tabela,
@@ -77,17 +78,26 @@ public sealed class DfpImportJobManager : IDfpImportJobManager
             job.MarcarProcessando();
 
             using var scope = _scopeFactory.CreateScope();
-            var import = scope.ServiceProvider.GetRequiredService<IDfpImportService>();
 
             var progresso = new Progress<(long bytes, int lidas, int importadas, int removidas, string? conjunto, int? ano)>(
                 p => job.AtualizarProgresso(p.bytes, p.lidas, p.importadas, p.removidas, p.conjunto, p.ano));
 
-            var resultado = await import.ImportarArquivoAsync(
-                job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct);
+            // Despacho por dataset: ITR grava em [itr], DFP em [dfp] (servicos isolados,
+            // mesma assinatura, sobre o nucleo compartilhado CvmCsvImporter).
+            var resultado = job.Base == "ITR"
+                ? await scope.ServiceProvider.GetRequiredService<IItrImportService>()
+                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct)
+                : await scope.ServiceProvider.GetRequiredService<IDfpImportService>()
+                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct);
 
             job.AtualizarProgresso(
                 job.BytesTotais, resultado.LinhasLidas, resultado.LinhasImportadas,
                 resultado.LinhasRemovidas, resultado.Conjunto, resultado.Ano);
+
+            // Apos qualquer carga de DRE (ITR ou DFP), recalcula a serie trimestral no
+            // escopo afetado (Ano + Conjunto). Tolerante a falha: nao reprova a importacao.
+            await TentarRecalcularTrimestralizacaoAsync(scope.ServiceProvider, job, resultado, ct);
+
             job.Finalizar(DfpImportStatus.Concluido,
                 MontarMensagem(resultado));
         }
@@ -106,6 +116,31 @@ public sealed class DfpImportJobManager : IDfpImportJobManager
         {
             TryDeletarArquivo(job.CaminhoTemp);
             try { job.Cancelamento.Dispose(); } catch { /* idempotente */ }
+        }
+    }
+
+    /// <summary>
+    /// Dispara o recalculo da trimestralizacao para o escopo recem-importado, apenas para
+    /// cargas de DRE (ITR ou DFP). Conjunto MIS (arquivo misto) recalcula CON e IND (null).
+    /// Falhas aqui sao logadas e nao reprovam a importacao ja concluida.
+    /// </summary>
+    private async Task TentarRecalcularTrimestralizacaoAsync(
+        IServiceProvider services, DfpImportJob job, DfpImportResult resultado, CancellationToken ct)
+    {
+        if (!string.Equals(resultado.Tipo, "DRE", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        try
+        {
+            var conjunto = resultado.Conjunto is "CON" or "IND" ? resultado.Conjunto : null;
+            var engine = services.GetRequiredService<ITrimestralizacaoService>();
+            await engine.RecalcularAsync(resultado.Ano, conjunto, cnpj: null, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Falha ao recalcular a trimestralizacao apos o job {JobId} ({Base}/{Tipo}, Ano={Ano}).",
+                job.Id, job.Base, resultado.Tipo, resultado.Ano);
         }
     }
 

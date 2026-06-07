@@ -48,11 +48,19 @@ builder.Services.AddScoped<IConnectionTester, ConnectionTester>();
 builder.Services.AddSingleton<ISchemaInitializer, SqlMigrationRunner>();
 builder.Services.AddScoped<IAnaliseCreditoRepository, AnaliseCreditoRepository>();
 
-// DFP (CVM): importacao dos CSVs por demonstracao + rastreio da estrutura por CNPJ.
+// CVM: nucleo de import compartilhado (DFP/ITR) + ledger generico parametrizado por tabela.
+builder.Services.AddScoped<ICvmImportacaoLog, CvmImportacaoLog>();
+builder.Services.AddScoped<CvmCsvImporter>();
+
+// DFP (CVM, anual): importacao dos CSVs por demonstracao + rastreio da estrutura por CNPJ.
 builder.Services.AddScoped<IDfpImportService, DfpImportService>();
-builder.Services.AddScoped<IDfpImportacaoLog, DfpImportacaoLog>();
 builder.Services.AddScoped<IDfpRepository, DfpRepository>();
 builder.Services.AddSingleton<IDfpImportJobManager, DfpImportJobManager>();
+
+// ITR (CVM, trimestral): importacao isolada (schema [itr]), motor de trimestralizacao e leitura.
+builder.Services.AddScoped<IItrImportService, ItrImportService>();
+builder.Services.AddScoped<IItrRepository, ItrRepository>();
+builder.Services.AddScoped<ITrimestralizacaoService, TrimestralizacaoService>();
 
 // Autenticacao/permissionamento: usuarios, perfis e log de atividades no proprio banco.
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();

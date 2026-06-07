@@ -11,12 +11,13 @@ public interface IDfpImportJobManager
 {
     /// <summary>
     /// Cria um job e dispara o processamento em segundo plano do arquivo temporario
-    /// <paramref name="caminhoTemp"/>. <paramref name="modelo"/> e o nome amigavel da
+    /// <paramref name="caminhoTemp"/>. <paramref name="baseDados"/> seleciona o dataset
+    /// ("DFP" anual ou "ITR" trimestral). <paramref name="modelo"/> e o nome amigavel da
     /// demonstracao e <paramref name="usuario"/> a identidade que iniciou a importacao.
     /// Retorna o job recem-criado (status Pendente).
     /// </summary>
     DfpImportJob Iniciar(
-        string tipo, string modelo, string tabela, string arquivo, string caminhoTemp,
+        string baseDados, string tipo, string modelo, string tabela, string arquivo, string caminhoTemp,
         long bytesTotais, string? usuario);
 
     /// <summary>Obtem o job pelo id, ou null se inexistente/ja descartado.</summary>

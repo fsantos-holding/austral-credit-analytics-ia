@@ -5,58 +5,54 @@ using Microsoft.AspNetCore.Mvc;
 namespace AustralCreditAnalytics.Api.Controllers;
 
 /// <summary>
-/// Estrutura DFP (Demonstracoes Financeiras Padronizadas / CVM): importacao dos
-/// CSVs por demonstracao e rastreio de toda a estrutura por CNPJ.
+/// Informacoes Trimestrais (ITR / CVM): importacao isolada dos CSVs trimestrais (DRE)
+/// para o schema [itr], motor de trimestralizacao (de-acumulacao T1-T3 do ITR + 4T do
+/// DFP anual) e leitura da serie trimestral por CNPJ. Endpoints independentes do DFP.
 /// </summary>
 [ApiController]
-[Route("api/dfp")]
+[Route("api/itr")]
 [Authorize]
-public class DfpController : ControllerBase
+public class ItrController : ControllerBase
 {
     private readonly IDfpImportJobManager _jobs;
-    private readonly IDfpRepository _repository;
+    private readonly IItrRepository _repository;
+    private readonly ITrimestralizacaoService _engine;
     private readonly ISqlConnectionFactory _factory;
     private readonly ISchemaInitializer _schema;
     private readonly IWebHostEnvironment _environment;
-    private readonly ILogger<DfpController> _logger;
+    private readonly ILogger<ItrController> _logger;
 
-    public DfpController(
+    public ItrController(
         IDfpImportJobManager jobs,
-        IDfpRepository repository,
+        IItrRepository repository,
+        ITrimestralizacaoService engine,
         ISqlConnectionFactory factory,
         ISchemaInitializer schema,
         IWebHostEnvironment environment,
-        ILogger<DfpController> logger)
+        ILogger<ItrController> logger)
     {
         _jobs = jobs;
         _repository = repository;
+        _engine = engine;
         _factory = factory;
         _schema = schema;
         _environment = environment;
         _logger = logger;
     }
 
-    /// <summary>Lista os tipos de demonstracao suportados (chave + tabela + descricao).</summary>
-    [HttpGet("tipos")]
-    public IActionResult Tipos()
-        => Ok(DfpDemonstracaoRegistry.Listar()
-            .Select(d => new { tipo = d.Tipo, tabela = d.Tabela, descricao = d.Descricao }));
-
     /// <summary>
-    /// Inicia a importacao de um CSV da CVM para a demonstracao informada como um job
-    /// em segundo plano. Envie o arquivo no campo multipart <c>arquivo</c>. O arquivo e
-    /// salvo em disco e processado em lotes; retorna <c>202 Accepted</c> com o
-    /// <c>jobId</c> para acompanhamento via GET importar/status/{jobId}.
+    /// Inicia a importacao de um CSV trimestral da CVM (so DRE) como job em segundo plano.
+    /// Envie o arquivo no campo multipart <c>arquivo</c>. Retorna 202 com o <c>jobId</c>.
     /// </summary>
     [HttpPost("importar/{tipo}")]
-    [RequestSizeLimit(1_073_741_824)] // 1 GiB: os CSVs anuais da CVM podem ser grandes.
+    [RequestSizeLimit(1_073_741_824)] // 1 GiB: os CSVs da CVM podem ser grandes.
     [RequestFormLimits(MultipartBodyLengthLimit = 1_073_741_824)]
     public Task<IActionResult> Importar(string tipo, IFormFile? arquivo, CancellationToken ct)
         => Run(async () =>
         {
-            var dem = DfpDemonstracaoRegistry.Resolver(tipo);
-            if (dem is null)
-                return BadRequest(new { message = $"Tipo de demonstracao desconhecido: '{tipo}'. Consulte GET /api/dfp/tipos." });
+            var destino = CvmDatasets.Itr.Resolver(tipo);
+            if (destino is null)
+                return BadRequest(new { message = $"Tipo de demonstracao nao suportado pela base ITR: '{tipo}'. Apenas DRE e aceito." });
 
             if (arquivo is null || arquivo.Length == 0)
                 return BadRequest(new { message = "Envie o arquivo CSV no campo 'arquivo'." });
@@ -65,15 +61,16 @@ public class DfpController : ControllerBase
             Directory.CreateDirectory(pastaImports);
             var caminhoTemp = Path.Combine(pastaImports, $"{Guid.NewGuid():N}.csv");
 
-            await using (var destino = new FileStream(caminhoTemp, FileMode.Create, FileAccess.Write, FileShare.None))
+            await using (var stream = new FileStream(caminhoTemp, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                await arquivo.CopyToAsync(destino, ct);
+                await arquivo.CopyToAsync(stream, ct);
             }
 
             var bytesTotais = new FileInfo(caminhoTemp).Length;
             var usuario = User.Identity?.Name;
             var job = _jobs.Iniciar(
-                "DFP", dem.Tipo, dem.Descricao, dem.Tabela, arquivo.FileName, caminhoTemp, bytesTotais, usuario);
+                "ITR", destino.Demonstracao.Tipo, destino.Demonstracao.Descricao, destino.Tabela,
+                arquivo.FileName, caminhoTemp, bytesTotais, usuario);
 
             return Accepted(new { jobId = job.Id });
         }, ct);
@@ -83,25 +80,27 @@ public class DfpController : ControllerBase
     public IActionResult ImportarStatus(string jobId)
     {
         var job = _jobs.Obter(jobId);
-        if (job is null)
+        if (job is null || job.Base != "ITR")
             return NotFound(new { message = "Job de importacao nao encontrado ou ja expirado." });
 
         return Ok(job.Snapshot());
     }
 
-    /// <summary>Cancela um job de importacao em andamento (commit incremental preservado).</summary>
+    /// <summary>Cancela um job de importacao ITR em andamento (commit incremental preservado).</summary>
     [HttpDelete("importar/{jobId}")]
     public IActionResult CancelarImportacao(string jobId)
     {
-        if (!_jobs.Cancelar(jobId))
+        var job = _jobs.Obter(jobId);
+        if (job is null || job.Base != "ITR")
             return NotFound(new { message = "Job de importacao nao encontrado ou ja expirado." });
 
+        _jobs.Cancelar(jobId);
         return Ok(new { message = "Cancelamento solicitado." });
     }
 
     /// <summary>
-    /// Lista companhias com DRE importada para o seletor de companhia. Filtros opcionais:
-    /// <c>busca</c> (razao social ou CNPJ) e <c>limite</c> de resultados (padrao 50).
+    /// Lista companhias com DRE trimestral disponivel (seletor de empresa). Filtros opcionais:
+    /// <c>busca</c> (razao social ou CNPJ) e <c>limite</c> (padrao 50).
     /// </summary>
     [HttpGet("empresas")]
     public Task<IActionResult> Empresas(
@@ -110,30 +109,37 @@ public class DfpController : ControllerBase
         CancellationToken ct)
         => Run(async () => Ok(await _repository.GetEmpresasAsync(busca, limite <= 0 ? 50 : limite, ct)), ct);
 
-    /// <summary>Mapa da estrutura disponivel para um CNPJ (documentos + contagem por demonstracao).</summary>
-    [HttpGet("{cnpj}/estrutura")]
-    public Task<IActionResult> Estrutura(string cnpj, CancellationToken ct)
-        => Run(async () => Ok(await _repository.GetEstruturaAsync(cnpj, ct)), ct);
-
     /// <summary>
-    /// Contas consolidadas do CNPJ (todas as demonstracoes por conta). Filtros opcionais:
-    /// <c>tipo</c> (DRE, BPA, ...), <c>dtRefer</c> (yyyyMMdd), <c>ordem</c> (ULTIMO/PENULTIMO),
+    /// Serie trimestral da DRE do CNPJ (valores ja de-acumulados). Filtros opcionais:
     /// <c>conjunto</c> (CON/IND) e <c>ano</c>.
     /// </summary>
-    [HttpGet("{cnpj}/contas")]
-    public Task<IActionResult> Contas(
+    [HttpGet("{cnpj}/dre/trimestral")]
+    public Task<IActionResult> DreTrimestral(
         string cnpj,
-        [FromQuery] string? tipo,
-        [FromQuery] string? dtRefer,
-        [FromQuery] string? ordem,
         [FromQuery] string? conjunto,
         [FromQuery] int? ano,
         CancellationToken ct)
-        => Run(async () => Ok(await _repository.GetContasAsync(cnpj, tipo, dtRefer, ordem, conjunto, ano, ct)), ct);
+        => Run(async () => Ok(await _repository.GetDreTrimestralAsync(cnpj, conjunto, ano, ct)), ct);
 
     /// <summary>
-    /// Historico de importacoes (ledger dfp.Importacao), mais recente primeiro. Filtros
-    /// opcionais por <c>tipo</c> e <c>ano</c>; <c>limite</c> de linhas (padrao 100).
+    /// Recalcula a trimestralizacao sob demanda. Filtros opcionais (query): <c>cnpj</c>,
+    /// <c>conjunto</c> (CON/IND) e <c>ano</c>. Sem filtros, recalcula tudo. Retorna o total gravado.
+    /// </summary>
+    [HttpPost("dre/trimestralizar")]
+    public Task<IActionResult> Trimestralizar(
+        [FromQuery] string? cnpj,
+        [FromQuery] string? conjunto,
+        [FromQuery] int? ano,
+        CancellationToken ct)
+        => Run(async () =>
+        {
+            var gravadas = await _engine.RecalcularAsync(ano, conjunto, cnpj, ct);
+            return Ok(new { linhasGravadas = gravadas });
+        }, ct);
+
+    /// <summary>
+    /// Historico do ledger itr.Importacao (mais recente primeiro). Filtros opcionais por
+    /// <c>tipo</c> e <c>ano</c>; <c>limite</c> de linhas (padrao 100).
     /// </summary>
     [HttpGet("importacoes")]
     public Task<IActionResult> Importacoes(
@@ -149,7 +155,7 @@ public class DfpController : ControllerBase
         if (!_factory.IsConfigured)
         {
             return StatusCode(StatusCodes.Status409Conflict,
-                new { message = "Conexao nao configurada. Configure a conexao antes de usar a estrutura DFP." });
+                new { message = "Conexao nao configurada. Configure a conexao antes de usar a estrutura ITR." });
         }
 
         try
@@ -159,12 +165,11 @@ public class DfpController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            // Mensagens de validacao da importacao/leitura sao seguras para exibir.
             return StatusCode(StatusCodes.Status409Conflict, new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Falha na operacao da estrutura DFP");
+            _logger.LogError(ex, "Falha na operacao da estrutura ITR");
             return StatusCode(StatusCodes.Status502BadGateway,
                 new { message = "Falha ao acessar o banco de dados. Verifique a configuracao e tente novamente." });
         }

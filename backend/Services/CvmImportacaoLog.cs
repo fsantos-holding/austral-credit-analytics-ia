@@ -3,33 +3,35 @@ using Dapper;
 namespace AustralCreditAnalytics.Api.Services;
 
 /// <summary>
-/// Implementacao de <see cref="IDfpImportacaoLog"/> sobre o canal gravavel. Tolerante a
-/// falha: erros sao logados e nunca interrompem a importacao em si (o rastreio e
-/// secundario ao fluxo de carga).
+/// Implementacao de <see cref="ICvmImportacaoLog"/> sobre o canal gravavel, parametrizada
+/// pela tabela do ledger (dfp.Importacao / itr.Importacao). Tolerante a falha: erros sao
+/// logados e nunca interrompem a importacao em si (o rastreio e secundario a carga).
+/// O nome da tabela vem dos descritores <see cref="CvmDatasets"/> (valor controlado, nao
+/// proveniente de entrada do usuario), portanto e seguro interpola-lo no SQL.
 /// </summary>
-public class DfpImportacaoLog : IDfpImportacaoLog
+public class CvmImportacaoLog : ICvmImportacaoLog
 {
     private const int CommandTimeout = 30;
 
     private readonly ISqlConnectionFactory _factory;
-    private readonly ILogger<DfpImportacaoLog> _logger;
+    private readonly ILogger<CvmImportacaoLog> _logger;
 
-    public DfpImportacaoLog(ISqlConnectionFactory factory, ILogger<DfpImportacaoLog> logger)
+    public CvmImportacaoLog(ISqlConnectionFactory factory, ILogger<CvmImportacaoLog> logger)
     {
         _factory = factory;
         _logger = logger;
     }
 
     public async Task<long?> IniciarAsync(
-        string tipo, string tabela, string? conjunto, int? ano, string arquivo, string? usuario,
-        CancellationToken ct = default)
+        string ledgerTabela, string tipo, string tabela, string? conjunto, int? ano,
+        string arquivo, string? usuario, CancellationToken ct = default)
     {
         try
         {
             await using var connection = _factory.CreateWritable();
             var id = await connection.ExecuteScalarAsync<long>(new CommandDefinition(
-                """
-                INSERT INTO dfp.Importacao (Tipo, Tabela, Conjunto, Ano, Arquivo, Usuario, Status)
+                $"""
+                INSERT INTO {ledgerTabela} (Tipo, Tabela, Conjunto, Ano, Arquivo, Usuario, Status)
                 OUTPUT INSERTED.Id
                 VALUES (@tipo, @tabela, @conjunto, @ano, @arquivo, @usuario, 'Processando');
                 """,
@@ -47,21 +49,21 @@ public class DfpImportacaoLog : IDfpImportacaoLog
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Falha ao abrir o registro de importacao DFP ({Tipo}/{Arquivo}).", tipo, arquivo);
+            _logger.LogError(ex, "Falha ao abrir o registro de importacao em {Ledger} ({Tipo}/{Arquivo}).", ledgerTabela, tipo, arquivo);
             return null;
         }
     }
 
     public async Task AtualizarAsync(
-        long id, int linhasRemovidas, int linhasLidas, int linhasImportadas,
+        string ledgerTabela, long id, int linhasRemovidas, int linhasLidas, int linhasImportadas,
         CancellationToken ct = default)
     {
         try
         {
             await using var connection = _factory.CreateWritable();
             await connection.ExecuteAsync(new CommandDefinition(
-                """
-                UPDATE dfp.Importacao
+                $"""
+                UPDATE {ledgerTabela}
                    SET LinhasRemovidas = @linhasRemovidas,
                        LinhasLidas = @linhasLidas,
                        LinhasImportadas = @linhasImportadas
@@ -72,12 +74,12 @@ public class DfpImportacaoLog : IDfpImportacaoLog
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Falha ao atualizar o registro de importacao DFP {Id}.", id);
+            _logger.LogWarning(ex, "Falha ao atualizar o registro de importacao {Ledger} {Id}.", ledgerTabela, id);
         }
     }
 
     public async Task FinalizarAsync(
-        long id, string status, string? mensagem,
+        string ledgerTabela, long id, string status, string? mensagem,
         int linhasRemovidas, int linhasLidas, int linhasImportadas, string? conjunto,
         CancellationToken ct = default)
     {
@@ -85,8 +87,8 @@ public class DfpImportacaoLog : IDfpImportacaoLog
         {
             await using var connection = _factory.CreateWritable();
             await connection.ExecuteAsync(new CommandDefinition(
-                """
-                UPDATE dfp.Importacao
+                $"""
+                UPDATE {ledgerTabela}
                    SET Status = @status,
                        Mensagem = @mensagem,
                        LinhasRemovidas = @linhasRemovidas,
@@ -110,7 +112,7 @@ public class DfpImportacaoLog : IDfpImportacaoLog
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Falha ao finalizar o registro de importacao DFP {Id}.", id);
+            _logger.LogWarning(ex, "Falha ao finalizar o registro de importacao {Ledger} {Id}.", ledgerTabela, id);
         }
     }
 

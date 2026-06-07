@@ -3,15 +3,15 @@ using AustralCreditAnalytics.Api.Models.Dfp;
 namespace AustralCreditAnalytics.Api.Services;
 
 /// <summary>
-/// Importacao DFP (anual, schema [dfp]). Adaptador fino sobre o nucleo
-/// <see cref="CvmCsvImporter"/>, fixando o descritor <see cref="CvmDatasets.Dfp"/>.
-/// Toda a logica de parsing/bulk-copy/ledger/delete de escopo vive no nucleo.
+/// Importacao ITR (trimestral, schema [itr]). Adaptador fino sobre o nucleo
+/// <see cref="CvmCsvImporter"/>, fixando o descritor <see cref="CvmDatasets.Itr"/>
+/// (so DRE, gravando em itr.Dre e registrando em itr.Importacao).
 /// </summary>
-public class DfpImportService : IDfpImportService
+public class ItrImportService : IItrImportService
 {
     private readonly CvmCsvImporter _importer;
 
-    public DfpImportService(CvmCsvImporter importer) => _importer = importer;
+    public ItrImportService(CvmCsvImporter importer) => _importer = importer;
 
     public Task<DfpImportResult> ImportarArquivoAsync(
         string tipo,
@@ -21,5 +21,5 @@ public class DfpImportService : IDfpImportService
         IProgress<(long bytes, int lidas, int importadas, int removidas, string? conjunto, int? ano)>? progresso = null,
         CancellationToken ct = default)
         => _importer.ImportarArquivoAsync(
-            CvmDatasets.Dfp, tipo, caminhoArquivo, nomeArquivo, usuario, progresso, ct);
+            CvmDatasets.Itr, tipo, caminhoArquivo, nomeArquivo, usuario, progresso, ct);
 }

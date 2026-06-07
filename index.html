@@ -325,58 +325,39 @@
   .dre-cm-l { font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.45); }
   .dre-cm-v { font-size: 13px; color: #fff; font-weight: 500; }
 
-  /* Abas */
-  .dre-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
-  .dre-tab { padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 7px; }
-  .dre-tab:hover { color: var(--text-secondary); }
-  .dre-tab.active { color: var(--navy); border-bottom-color: var(--accent); font-weight: 600; }
-  .dre-pane { display: none; }
-  .dre-pane.active { display: block; }
-
   /* KPIs com variação */
   .kpi-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; margin-left: 6px; }
   .kpi-trend.up { color: var(--success); }
   .kpi-trend.down { color: var(--danger); }
   .kpi-trend.flat { color: var(--text-muted); }
-  .kpi-card .kpi-margin { font-size: 12px; color: var(--accent-ink); font-weight: 600; margin-top: 4px; }
+  .kpi-card .kpi-margin { font-size: 12px; color: var(--accent-ink); font-weight: 600; }
+  .kpi-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .kpi-card.kpi-gold { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(0,201,188,0.25), var(--shadow); }
 
-  /* Tabela hierárquica DRE */
-  .dre-table th.col-num, .dre-table td.col-num { text-align: right; font-family: 'DM Mono', monospace; }
-  .dre-table td.dre-desc { white-space: normal; max-width: 460px; }
-  .dre-row .dre-toggle { display: inline-flex; width: 16px; cursor: pointer; color: var(--text-muted); }
+  /* Tabela hierárquica DRE — layout premium */
+  .dre-table { border-collapse: separate; border-spacing: 0; }
+  .dre-table thead th { position: sticky; top: 0; z-index: 1; background: var(--navy); color: #fff; font-size: 10.5px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 12px 16px; border: 0; }
+  .dre-table thead th.col-num { color: var(--accent-light); }
+  .dre-table th.col-num, .dre-table td.col-num { text-align: right; font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; }
+  .dre-table td { padding: 9px 16px; border-bottom: 1px solid var(--border); }
+  .dre-table td.dre-desc { white-space: normal; max-width: 520px; color: var(--text-secondary); }
+  .dre-table td.col-num { color: var(--text-primary); font-weight: 500; }
+  .dre-row { transition: background 0.12s; }
+  .dre-row:hover { background: var(--accent-pale); }
+  .dre-row .dre-toggle { display: inline-flex; width: 16px; cursor: pointer; color: var(--text-muted); transition: color 0.12s; }
+  .dre-row .dre-toggle:hover { color: var(--accent-ink); }
   .dre-row .dre-toggle.empty { visibility: hidden; }
   .dre-row.collapsed-child { display: none; }
-  .dre-lvl-2 td.dre-desc { font-weight: 600; }
+  .dre-lvl-2 td.dre-desc { font-weight: 700; color: var(--navy); letter-spacing: 0.2px; }
+  .dre-lvl-2 td.col-num { font-weight: 600; color: var(--text-primary); }
   .dre-row.subtotal { background: var(--surface-2); }
+  .dre-row.subtotal:hover { background: var(--surface-2); }
   .dre-row.subtotal td { font-weight: 700; color: var(--navy); border-top: 1px solid var(--border-strong); }
   .dre-row.total { background: var(--accent-pale); }
-  .dre-row.total td { font-weight: 700; color: var(--accent-ink); border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); }
+  .dre-row.total:hover { background: var(--accent-pale); }
+  .dre-row.total td { font-weight: 700; font-size: 14px; color: var(--accent-ink); border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); }
   .dre-row.info td { color: var(--text-muted); font-style: italic; }
-  .dre-ah { font-size: 11px; font-weight: 600; }
-  .dre-ah.up { color: var(--success); }
-  .dre-ah.down { color: var(--danger); }
-  .dre-ah.flat { color: var(--text-muted); }
-  .dre-av { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
-
-  /* Waterfall / gráficos SVG */
-  .dre-chart-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 18px; }
-  .dre-chart-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-  .dre-chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
-  .dre-svg { width: 100%; height: auto; display: block; overflow: visible; }
-  .dre-svg text { font-family: 'DM Sans', sans-serif; }
-  .wf-bar-pos { fill: var(--accent); }
-  .wf-bar-neg { fill: #E07A7A; }
-  .wf-bar-total { fill: var(--navy); }
-  .wf-connector { stroke: var(--border-strong); stroke-dasharray: 3 3; }
-  .wf-label { font-size: 10px; fill: var(--text-secondary); }
-  .wf-value { font-size: 10px; fill: var(--text-primary); font-family: 'DM Mono', monospace; font-weight: 600; }
-  .trend-grid-line { stroke: var(--border); stroke-width: 1; }
-  .trend-axis-label { font-size: 10px; fill: var(--text-muted); }
-  .trend-line { fill: none; stroke-width: 2.5; }
-  .trend-dot { stroke: #fff; stroke-width: 1.5; }
-  .dre-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }
-  .dre-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
-  .dre-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+  .dre-av { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; }
 
   .dre-empty { background: var(--surface); border-radius: var(--radius-lg); border: 1px dashed var(--border-strong); padding: 56px 20px; text-align: center; color: var(--text-muted); }
   .dre-empty .dre-empty-icon { font-size: 38px; opacity: 0.6; display: block; margin-bottom: 12px; }
@@ -440,6 +421,7 @@
         <div class="nav-label">Análise</div>
         <div class="nav-item active" data-view="credito"><i class="ti ti-chart-histogram"></i><span>Análise de Crédito</span></div>
         <div class="nav-item" data-view="dre"><i class="ti ti-report-money"></i><span>Leitura de DRE</span></div>
+        <div class="nav-item" data-view="itr"><i class="ti ti-calendar-stats"></i><span>Leitura de ITR (Trimestral)</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Dados</div>
@@ -535,6 +517,10 @@
             <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
             <select class="filter-select" id="dre-ano" disabled><option>—</option></select>
           </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Trimestre</label>
+            <select class="filter-select" id="dre-periodo" disabled><option>—</option></select>
+          </div>
           <select class="filter-select" id="dre-conjunto" disabled>
             <option value="CON">Consolidado</option>
             <option value="IND">Individual</option>
@@ -553,7 +539,7 @@
           </div>
           <div class="dre-company-meta">
             <div class="dre-cm-item"><span class="dre-cm-l">Código CVM</span><span class="dre-cm-v" id="dre-co-cvm">—</span></div>
-            <div class="dre-cm-item"><span class="dre-cm-l">Exercício</span><span class="dre-cm-v" id="dre-co-ano">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Período</span><span class="dre-cm-v" id="dre-co-ano">—</span></div>
             <div class="dre-cm-item"><span class="dre-cm-l">Conjunto</span><span class="dre-cm-v" id="dre-co-conjunto">—</span></div>
             <div class="dre-cm-item"><span class="dre-cm-l">Moeda</span><span class="dre-cm-v" id="dre-co-moeda">—</span></div>
             <div class="dre-cm-item"><span class="dre-cm-l">Versão</span><span class="dre-cm-v" id="dre-co-versao">—</span></div>
@@ -568,66 +554,113 @@
 
         <!-- Conteúdo -->
         <div id="dre-content" class="app-hidden">
-          <div class="kpi-grid" id="dre-kpis"></div>
-
-          <div class="dre-tabs">
-            <div class="dre-tab active" data-tab="demonstrativo"><i class="ti ti-table"></i> Demonstrativo</div>
-            <div class="dre-tab" data-tab="tendencia"><i class="ti ti-trending-up"></i> Tendência</div>
-          </div>
-
-          <!-- Aba Demonstrativo -->
-          <div class="dre-pane active" id="dre-pane-demonstrativo">
-            <div class="dre-chart-card">
-              <div class="dre-chart-title"><i class="ti ti-stairs"></i> Composição do Resultado</div>
-              <div class="dre-chart-sub" id="dre-wf-sub">Da Receita ao Lucro Líquido (último exercício).</div>
-              <div id="dre-waterfall"></div>
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Demonstração do Resultado</div>
+              <div class="table-count" id="dre-table-count">—</div>
             </div>
-
-            <div class="table-card">
-              <div class="table-header">
-                <div class="table-title">Demonstração do Resultado</div>
-                <div class="table-count" id="dre-table-count">—</div>
-              </div>
-              <div class="table-wrap">
-                <table class="dre-table">
-                  <thead>
-                    <tr>
-                      <th style="width:18px;"></th>
-                      <th>Conta</th>
-                      <th class="col-num" id="dre-th-ultimo">Último</th>
-                      <th class="col-num" id="dre-th-penultimo">Penúltimo</th>
-                      <th class="col-num">AH%</th>
-                      <th class="col-num">AV%</th>
-                    </tr>
-                  </thead>
-                  <tbody id="dre-body"></tbody>
-                </table>
-              </div>
+            <div class="table-wrap">
+              <table class="dre-table">
+                <thead>
+                  <tr>
+                    <th style="width:18px;"></th>
+                    <th>Conta</th>
+                    <th class="col-num" id="dre-th-atual">Valor</th>
+                    <th class="col-num">AV%</th>
+                  </tr>
+                </thead>
+                <tbody id="dre-body"></tbody>
+              </table>
             </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Aba Tendência -->
-          <div class="dre-pane" id="dre-pane-tendencia">
-            <div class="dre-chart-card">
-              <div class="dre-chart-title"><i class="ti ti-chart-line"></i> Evolução das contas-chave</div>
-              <div class="dre-chart-sub">Receita, Resultado Bruto, EBIT e Lucro Líquido ao longo dos exercícios disponíveis.</div>
-              <div id="dre-trend-chart"></div>
-              <div class="dre-legend" id="dre-trend-legend"></div>
+      <!-- ===== LEITURA DE ITR (TRIMESTRAL) ===== -->
+      <section class="view" id="view-itr">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Leitura de ITR (Trimestral)</div>
+            <div class="page-subtitle">Demonstração do Resultado por trimestre real (T1–T3 de ITR, 4T do DFP anual), já de-acumulada, com análise vertical.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="btn-itr-export" disabled><i class="ti ti-download"></i> Exportar CSV</button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="dre-search">
+            <div class="search-box">
+              <i class="ti ti-search"></i>
+              <input type="text" id="itr-busca" placeholder="Buscar companhia por razão social ou CNPJ..." autocomplete="off">
             </div>
-            <div class="dre-chart-card">
-              <div class="dre-chart-title"><i class="ti ti-percentage"></i> Margens por exercício</div>
-              <div class="dre-chart-sub">Margem bruta, operacional e líquida (% sobre a receita).</div>
-              <div id="dre-margin-chart"></div>
-              <div class="dre-legend" id="dre-margin-legend"></div>
+            <div class="dre-autocomplete" id="itr-autocomplete"></div>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
+            <select class="filter-select" id="itr-ano" disabled><option>—</option></select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Trimestre</label>
+            <select class="filter-select" id="itr-periodo" disabled><option>—</option></select>
+          </div>
+          <select class="filter-select" id="itr-conjunto" disabled>
+            <option value="CON">Consolidado</option>
+            <option value="IND">Individual</option>
+          </select>
+          <select class="filter-select" id="itr-modo" disabled>
+            <option value="trimestral">Trimestral</option>
+            <option value="acumulado">Acumulado</option>
+          </select>
+          <button class="btn btn-primary" id="btn-itr-analisar" disabled><i class="ti ti-chart-bar"></i> Analisar</button>
+        </div>
+
+        <!-- Cabeçalho da companhia -->
+        <div class="dre-company" id="itr-company">
+          <div class="dre-company-top">
+            <div>
+              <div class="dre-company-name" id="itr-co-name">—</div>
+              <div class="dre-company-cnpj" id="itr-co-cnpj">—</div>
             </div>
-            <div class="table-card">
-              <div class="table-header"><div class="table-title">Série ano a ano</div></div>
-              <div class="table-wrap">
-                <table class="dre-table">
-                  <thead><tr id="dre-trend-head"></tr></thead>
-                  <tbody id="dre-trend-body"></tbody>
-                </table>
-              </div>
+            <span class="dre-template-pill" id="itr-co-template"><i class="ti ti-tag"></i> —</span>
+          </div>
+          <div class="dre-company-meta">
+            <div class="dre-cm-item"><span class="dre-cm-l">Código CVM</span><span class="dre-cm-v" id="itr-co-cvm">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Período</span><span class="dre-cm-v" id="itr-co-ano">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Conjunto</span><span class="dre-cm-v" id="itr-co-conjunto">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Visão</span><span class="dre-cm-v" id="itr-co-modo">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Origem do trimestre</span><span class="dre-cm-v" id="itr-co-origem">—</span></div>
+          </div>
+        </div>
+
+        <!-- Estado vazio / carregando -->
+        <div class="dre-empty" id="itr-empty">
+          <i class="ti ti-calendar-search dre-empty-icon"></i>
+          <div id="itr-empty-msg">Selecione uma companhia para visualizar a DRE trimestral.</div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="itr-content" class="app-hidden">
+          <div id="itr-incons" style="display:none;margin-bottom:14px;padding:11px 14px;border-radius:8px;border:1px solid rgba(245,158,11,0.45);background:rgba(245,158,11,0.12);color:var(--warning,#B45309);font-size:13px;">
+            <span id="itr-incons-msg"></span>
+          </div>
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Demonstração do Resultado · Trimestral</div>
+              <div class="table-count" id="itr-table-count">—</div>
+            </div>
+            <div class="table-wrap">
+              <table class="dre-table">
+                <thead>
+                  <tr>
+                    <th style="width:18px;"></th>
+                    <th>Conta</th>
+                    <th class="col-num" id="itr-th-atual">Valor</th>
+                    <th class="col-num">AV%</th>
+                  </tr>
+                </thead>
+                <tbody id="itr-body"></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -638,7 +671,16 @@
         <div class="page-header">
           <div>
             <div class="page-title">Importação de Modelos</div>
-            <div class="page-subtitle">Carregue os CSVs da CVM (open data DFP) para as demonstrações padronizadas.</div>
+            <div class="page-subtitle">Carregue os CSVs da CVM (open data DFP/ITR) para as demonstrações padronizadas.</div>
+          </div>
+          <div class="page-actions">
+            <div class="field-inline">
+              <label style="text-transform:none;letter-spacing:0;font-weight:500;">Base</label>
+              <select class="filter-select" id="import-base">
+                <option value="DFP">DFP (anual)</option>
+                <option value="ITR">ITR (trimestral)</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -968,6 +1010,7 @@ function switchView(view) {
   if (view === 'usuarios') loadUsuarios();
   if (view === 'importacao') { loadModelos(); carregarHistorico(); }
   if (view === 'dre') loadDre();
+  if (view === 'itr') loadItr();
 }
 
 /* ---------- crédito ---------- */
@@ -1318,6 +1361,18 @@ let modeloSelecionado = null;
 let arquivoSelecionado = null;
 let importPollTimer = null;
 let importJobId = null;
+let importBase = 'DFP';        // base selecionada na tela de importacao (DFP/ITR)
+let importJobApiBase = 'api/dfp'; // prefixo da API do job em andamento (capturado no inicio)
+
+function importApiBase() { return importBase === 'ITR' ? 'api/itr' : 'api/dfp'; }
+
+document.getElementById('import-base').addEventListener('change', (e) => {
+  importBase = e.target.value === 'ITR' ? 'ITR' : 'DFP';
+  // ITR so trata DRE; se o modelo selecionado nao for valido para a base, limpa.
+  if (importBase === 'ITR' && modeloSelecionado && modeloSelecionado !== 'DRE') resetImportForm();
+  renderModelos();
+  carregarHistorico();
+});
 
 function fmtBytes(b) {
   if (b == null) return '0 B';
@@ -1352,7 +1407,13 @@ function renderModelos() {
     grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível.</div>';
     return;
   }
-  grid.innerHTML = modelosCache.map(m => {
+  // ITR (trimestral) so importa DRE; DFP (anual) mostra todas as demonstracoes.
+  const lista = importBase === 'ITR' ? modelosCache.filter(m => m.tipo === 'DRE') : modelosCache;
+  if (!lista.length) {
+    grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível para esta base.</div>';
+    return;
+  }
+  grid.innerHTML = lista.map(m => {
     const meta = MODELO_META[m.tipo] || { icon: 'ti-table', rotulo: m.tipo };
     const sel = modeloSelecionado === m.tipo ? ' selected' : '';
     return `<div class="model-card${sel}" data-tipo="${m.tipo}" title="${m.descricao || ''}">
@@ -1415,7 +1476,8 @@ async function iniciarImportacao() {
   try {
     const fd = new FormData();
     fd.append('arquivo', arquivoSelecionado);
-    const res = await authFetch(`api/dfp/importar/${encodeURIComponent(modeloSelecionado)}`, { method: 'POST', body: fd });
+    importJobApiBase = importApiBase();
+    const res = await authFetch(`${importJobApiBase}/importar/${encodeURIComponent(modeloSelecionado)}`, { method: 'POST', body: fd });
     const d = await parseJson(res);
     if (!res.ok) { toast(d.message || 'Falha ao iniciar importação.', true); return; }
     importJobId = d.jobId;
@@ -1477,7 +1539,7 @@ function pollStatus(jobId) {
   importPollTimer = setInterval(async () => {
     if (importJobId !== jobId) { clearInterval(importPollTimer); return; }
     try {
-      const res = await authFetch(`api/dfp/importar/status/${encodeURIComponent(jobId)}`);
+      const res = await authFetch(`${importJobApiBase}/importar/status/${encodeURIComponent(jobId)}`);
       if (!res.ok) { clearInterval(importPollTimer); return; }
       const s = await res.json();
       aplicarStatus(s);
@@ -1524,7 +1586,7 @@ document.getElementById('btn-importar-cancelar').addEventListener('click', async
   if (!importJobId) return;
   const btn = document.getElementById('btn-importar-cancelar');
   btn.disabled = true;
-  try { await authFetch(`api/dfp/importar/${encodeURIComponent(importJobId)}`, { method: 'DELETE' }); }
+  try { await authFetch(`${importJobApiBase}/importar/${encodeURIComponent(importJobId)}`, { method: 'DELETE' }); }
   catch { toast('Falha ao solicitar cancelamento.', true); }
   finally { btn.disabled = false; }
 });
@@ -1554,7 +1616,7 @@ async function carregarHistorico() {
   if (!body) return;
   body.innerHTML = '<tr><td colspan="9" class="hist-empty"><i class="ti ti-loader-2 spin"></i> Carregando histórico...</td></tr>';
   try {
-    const res = await authFetch('api/dfp/importacoes?limite=100');
+    const res = await authFetch(`${importApiBase()}/importacoes?limite=100`);
     if (!res.ok) { body.innerHTML = '<tr><td colspan="9" class="hist-empty">Não foi possível carregar o histórico.</td></tr>'; return; }
     const rows = await res.json();
     if (!Array.isArray(rows) || rows.length === 0) {
@@ -1591,7 +1653,9 @@ const dreState = {
   rows: [],           // todas as linhas DRE da companhia (todos anos/conjuntos/versões)
   conjuntosDisp: [],  // conjuntos presentes nos dados
   anosDisp: [],       // anos presentes (desc)
-  modelo: null,       // modelo do exercício selecionado (DRE_MODEL)
+  periodos: [],       // periodos derivados de (dtRefer, dtIniExerc, dtFimExerc)
+  periodoKey: null,   // periodo selecionado (chave conjunto|dtRefer|dtIni|dtFim)
+  modelo: null,       // modelo do periodo selecionado (DRE_MODEL)
 };
 let dreBuscaTimer = null;
 let dreAcItems = [];
@@ -1630,9 +1694,6 @@ function dreFmtPct(v, dec = 1) {
   if (v == null || isNaN(v)) return '—';
   return v.toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + '%';
 }
-function dreAhClass(v) { return v == null ? 'flat' : v > 0.05 ? 'up' : v < -0.05 ? 'down' : 'flat'; }
-function dreAhArrow(v) { return v == null ? '' : v > 0.05 ? '▲' : v < -0.05 ? '▼' : '▬'; }
-
 /* ---------- carregamento / dicionário ---------- */
 async function loadDre() {
   if (dreState.inited) return;
@@ -1680,12 +1741,11 @@ function dreBindEvents() {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.dre-search')) dreFecharAutocomplete();
   });
-  document.getElementById('dre-conjunto').addEventListener('change', () => dreRender());
-  document.getElementById('dre-ano').addEventListener('change', () => dreRender());
+  document.getElementById('dre-conjunto').addEventListener('change', () => { dreState.periodoKey = null; dreRender(); });
+  document.getElementById('dre-ano').addEventListener('change', () => { dreState.periodoKey = null; dreRender(); });
+  document.getElementById('dre-periodo').addEventListener('change', (e) => { dreState.periodoKey = e.target.value; dreRender(); });
   document.getElementById('btn-dre-analisar').addEventListener('click', dreAnalisar);
   document.getElementById('btn-dre-export').addEventListener('click', dreExportCsv);
-  document.querySelectorAll('.dre-tab').forEach(tab =>
-    tab.addEventListener('click', () => dreSwitchTab(tab.dataset.tab)));
 }
 
 /* ---------- autocomplete de companhia ---------- */
@@ -1759,6 +1819,7 @@ async function dreAnalisar() {
     }
     dreState.conjuntosDisp = [...new Set(dreState.rows.map(r => (r.conjunto || '').toUpperCase()).filter(Boolean))];
     dreState.anosDisp = [...new Set(dreState.rows.map(r => r.ano).filter(v => v != null))].sort((a, b) => b - a);
+    dreState.periodoKey = null;
     drePrepararFiltros();
     dreRender();
   } catch {
@@ -1789,24 +1850,65 @@ function dreMostrarVazio(html, manterCompany = false) {
   document.getElementById('btn-dre-export').disabled = true;
 }
 
-/* ---------- montagem do modelo (dirigido pelo dicionário) ---------- */
-function dreSliceVersao(rows, conjunto, ano) {
-  let f = rows.filter(r => (r.conjunto || '').toUpperCase() === conjunto && r.ano === ano);
-  if (!f.length) return null;
-  const maxV = Math.max(...f.map(r => r.versao || 0));
-  f = f.filter(r => (r.versao || 0) === maxV);
-  return {
-    versao: maxV,
-    meta: f[0],
-    ultimo: f.filter(r => dreNorm(r.ordemExerc) === 'ultimo'),
-    penultimo: f.filter(r => dreNorm(r.ordemExerc) === 'penultimo'),
-  };
+/* ---------- modelo por periodo (dtRefer, dtIniExerc, dtFimExerc) ---------- */
+function dreParseISO(s) {
+  if (!s) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s.toString());
+  return m ? { y: +m[1], mo: +m[2], d: +m[3] } : null;
+}
+const DRE_MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+function dreMesNome(mo) { return DRE_MESES[mo - 1] || ''; }
+
+/**
+ * Agrupa as linhas "ULTIMO" por periodo (conjunto, dtRefer, dtIniExerc, dtFimExerc),
+ * escolhe a maior versao por periodo, deduplica CD_CONTA e classifica o trimestre
+ * derivado de DT_FIM_EXERC. Retorna a lista ordenada cronologicamente (mais antigo -> mais recente).
+ */
+function dreListarPeriodos(rows, conjunto) {
+  const base = rows.filter(r =>
+    (r.conjunto || '').toUpperCase() === conjunto &&
+    dreNorm(r.ordemExerc) === 'ultimo' && r.cdConta);
+  const grupos = new Map();
+  for (const r of base) {
+    const fim = dreParseISO(r.dtFimExerc);
+    if (!fim) continue;
+    const ini = dreParseISO(r.dtIniExerc);
+    const key = conjunto + '|' + (r.dtRefer || '') + '|' + (r.dtIniExerc || '') + '|' + (r.dtFimExerc || '');
+    let g = grupos.get(key);
+    if (!g) { g = { key, rows: [], fim, ini, dtRefer: r.dtRefer }; grupos.set(key, g); }
+    g.rows.push(r);
+  }
+  const periodos = [];
+  for (const g of grupos.values()) {
+    const maxV = Math.max(...g.rows.map(r => r.versao || 0));
+    const vrows = g.rows.filter(r => (r.versao || 0) === maxV);
+    const meta = vrows[0];
+    const escala = dreEscala(meta.escalaMoeda);
+    const contaMap = new Map(); // dedup por CD_CONTA (mantem o ultimo da maior versao)
+    for (const r of vrows) contaMap.set(r.cdConta, { cd: r.cdConta, ds: r.dsConta, val: (r.vlConta || 0) * escala });
+    const contas = [...contaMap.values()];
+    const valMap = {};
+    contas.forEach(c => { valMap[c.cd] = c.val; });
+
+    const fimM = g.fim.mo, iniM = g.ini ? g.ini.mo : fimM;
+    const quarter = Math.min(4, Math.max(1, Math.ceil(fimM / 3)));
+    const mesesLabel = g.ini ? (dreMesNome(iniM) + '–' + dreMesNome(fimM)) : dreMesNome(fimM);
+    periodos.push({
+      key: g.key, dtRefer: g.dtRefer, fim: g.fim, ini: g.ini,
+      ano: g.fim.y, quarter,
+      versao: maxV, meta, escala, contas, valMap,
+      label: 'T' + quarter + ' ' + g.fim.y,
+      mesesLabel,
+      optLabel: 'T' + quarter + ' · ' + mesesLabel,
+    });
+  }
+  periodos.sort((a, b) => (a.fim.y * 100 + a.fim.mo) - (b.fim.y * 100 + b.fim.mo));
+  return periodos;
 }
 
-function dreDetectTemplate(ultimoRows) {
+function dreDetectTemplate(contas) {
   const dict = dreState.dict;
-  const nivel2 = ultimoRows.filter(r => /^3\.\d{2}$/.test(r.cdConta)).map(r => r.dsConta);
-  const hay = nivel2.map(dreNorm).join(' | ');
+  const hay = contas.filter(c => /^3\.\d{2}$/.test(c.cd)).map(c => dreNorm(c.ds)).join(' | ');
   let best = 'GERAL', bestScore = 0;
   for (const key of Object.keys(dict.templates)) {
     const t = dict.templates[key];
@@ -1818,58 +1920,41 @@ function dreDetectTemplate(ultimoRows) {
   return best;
 }
 
-function dreBuildModel(conjunto, ano) {
-  const slice = dreSliceVersao(dreState.rows, conjunto, ano);
-  if (!slice) return null;
-  const tplKey = dreDetectTemplate(slice.ultimo);
+/**
+ * Monta a DRE do periodo selecionado: detecta o template, mapeia papeis canonicos
+ * e calcula a analise vertical (AV% = valor / receita liquida).
+ */
+function dreBuildModel(conjunto, periodoKey) {
+  const todos = dreListarPeriodos(dreState.rows, conjunto);
+  if (!todos.length) return null;
+  const atual = todos.find(p => p.key === periodoKey) || todos[todos.length - 1];
+
+  const tplKey = dreDetectTemplate(atual.contas);
   const tpl = dreState.dict.templates[tplKey];
   const papeis = tpl.papeis || {};
   const cdRole = {};
   for (const [role, info] of Object.entries(papeis)) cdRole[info.cd] = { role, ...info };
 
-  const escala = dreEscala(slice.meta.escalaMoeda);
-  const penMap = {};
-  slice.penultimo.forEach(r => { penMap[r.cdConta] = (r.vlConta || 0) * escala; });
-
   const receitaCd = papeis.receita ? papeis.receita.cd : null;
-  let receitaUlt = null;
-  slice.ultimo.forEach(r => { if (r.cdConta === receitaCd) receitaUlt = (r.vlConta || 0) * escala; });
+  const receita = receitaCd != null ? (atual.valMap.hasOwnProperty(receitaCd) ? atual.valMap[receitaCd] : null) : null;
 
-  const linhas = slice.ultimo
-    .slice()
-    .sort((a, b) => dreCmpCd(a.cdConta, b.cdConta))
-    .map(r => {
-      const ult = (r.vlConta || 0) * escala;
-      const pen = penMap.hasOwnProperty(r.cdConta) ? penMap[r.cdConta] : null;
-      const ah = (pen != null && pen !== 0) ? (ult - pen) / Math.abs(pen) : null;
-      const av = (receitaUlt && receitaUlt !== 0) ? (ult / Math.abs(receitaUlt)) * 100 : null;
-      const papel = cdRole[r.cdConta] || null;
-      return {
-        cd: r.cdConta,
-        nivel: dreNivel(r.cdConta),
-        ds: r.dsConta || (papel ? papel.rotulo : r.cdConta),
-        role: papel ? papel.role : null,
-        tipo: papel ? papel.tipo : null,
-        ultimo: ult, penultimo: pen, ah, av,
-      };
-    });
-
-  const roleVal = (role) => {
-    if (!papeis[role]) return null;
-    const ln = linhas.find(l => l.cd === papeis[role].cd);
-    return ln ? ln.ultimo : null;
-  };
-  const roleAh = (role) => {
-    if (!papeis[role]) return null;
-    const ln = linhas.find(l => l.cd === papeis[role].cd);
-    return ln ? ln.ah : null;
-  };
+  const linhas = atual.contas.slice().sort((a, b) => dreCmpCd(a.cd, b.cd)).map(c => {
+    const at = c.val;
+    const av = (receita && receita !== 0) ? (at / Math.abs(receita)) * 100 : null;
+    const papel = cdRole[c.cd] || null;
+    return {
+      cd: c.cd, nivel: dreNivel(c.cd),
+      ds: c.ds || (papel ? papel.rotulo : c.cd),
+      role: papel ? papel.role : null,
+      tipo: papel ? papel.tipo : null,
+      atual: at, av,
+    };
+  });
 
   return {
     templateKey: tplKey, templateNome: tpl.nome || tplKey, margens: tpl.margens || ['bruta', 'liquida'],
-    papeis, versao: slice.versao, meta: slice.meta, escala, receita: receitaUlt,
-    linhas, roleVal, roleAh,
-    temPenultimo: slice.penultimo.length > 0,
+    papeis, escala: atual.escala, meta: atual.meta, versao: atual.versao,
+    periodo: atual, receita, linhas,
   };
 }
 
@@ -1877,34 +1962,60 @@ function dreBuildModel(conjunto, ano) {
 function dreRender() {
   if (!dreState.rows.length) return;
   const conjunto = document.getElementById('dre-conjunto').value;
-  let ano = parseInt(document.getElementById('dre-ano').value, 10);
-  if (!dreState.anosDisp.includes(ano)) { ano = dreState.anosDisp[0]; document.getElementById('dre-ano').value = ano; }
+  const todos = dreListarPeriodos(dreState.rows, conjunto);
+  dreState.periodos = todos;
+  if (!todos.length) {
+    dreMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados de DRE para ' + (conjunto === 'CON' ? 'Consolidado' : 'Individual') + '.</div>', true);
+    return;
+  }
 
-  const model = dreBuildModel(conjunto, ano);
+  const anos = [...new Set(todos.map(p => p.ano))].sort((a, b) => b - a);
+  const selAno = document.getElementById('dre-ano');
+  let ano = parseInt(selAno.value, 10);
+  if (!anos.includes(ano)) { ano = anos[0]; }
+  // sincroniza o seletor de exercicio com os anos reais dos periodos
+  const optsAtual = [...selAno.options].map(o => o.value).join(',');
+  if (optsAtual !== anos.join(',')) {
+    selAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
+  selAno.value = ano;
+  selAno.disabled = false;
+
+  // periodos (trimestres importados) do exercicio selecionado
+  const doAno = todos.filter(p => p.ano === ano)
+    .sort((a, b) => (b.quarter - a.quarter) || (b.fim.mo - a.fim.mo));
+  const selPer = document.getElementById('dre-periodo');
+  selPer.innerHTML = doAno.map(p => `<option value="${p.key}">${p.optLabel}</option>`).join('');
+  selPer.disabled = !doAno.length;
+
+  let periodoKey = dreState.periodoKey;
+  if (!doAno.some(p => p.key === periodoKey)) periodoKey = doAno.length ? doAno[0].key : null;
+  dreState.periodoKey = periodoKey;
+  selPer.value = periodoKey || '';
+
+  const model = dreBuildModel(conjunto, periodoKey);
   dreState.modelo = model;
   if (!model) {
-    dreMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados de DRE para ' + conjunto + ' em ' + ano + '.</div>', true);
+    dreMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados de DRE para o período selecionado.</div>', true);
     return;
   }
 
   document.getElementById('dre-empty').style.display = 'none';
   document.getElementById('dre-content').classList.remove('app-hidden');
   document.getElementById('btn-dre-export').disabled = false;
-  dreRenderCompany(model, conjunto, ano);
-  dreRenderKpis(model);
+  dreRenderCompany(model, conjunto);
   dreRenderTabela(model);
-  dreRenderWaterfall(model);
-  dreRenderTendencia(conjunto);
 }
 
-function dreRenderCompany(model, conjunto, ano) {
+function dreRenderCompany(model, conjunto) {
   const card = document.getElementById('dre-company');
   card.classList.add('show');
   const e = dreState.empresa;
+  const p = model.periodo;
   document.getElementById('dre-co-name').textContent = model.meta.denominacao || e.denominacao || '—';
   document.getElementById('dre-co-cnpj').textContent = formatDoc(model.meta.cnpj || e.cnpjNum);
   document.getElementById('dre-co-cvm').textContent = model.meta.cdCvm || e.cdCvm || '—';
-  document.getElementById('dre-co-ano').textContent = ano;
+  document.getElementById('dre-co-ano').textContent = `${p.label} · ${p.mesesLabel}`;
   document.getElementById('dre-co-conjunto').textContent = conjunto === 'CON' ? 'Consolidado' : 'Individual';
   const escalaTxt = model.escala >= 1e6 ? 'milhões' : model.escala >= 1e3 ? 'milhares' : 'unidade';
   document.getElementById('dre-co-moeda').textContent = (model.meta.moeda || 'R$') + ' · ' + escalaTxt;
@@ -1912,43 +2023,17 @@ function dreRenderCompany(model, conjunto, ano) {
   document.getElementById('dre-co-template').innerHTML = '<i class="ti ti-tag"></i> ' + model.templateNome;
 }
 
-function dreRenderKpis(model) {
-  const cards = [];
-  const mk = (label, role, opts = {}) => {
-    const val = model.roleVal(role);
-    if (val == null) return;
-    const ah = model.roleAh(role);
-    const margem = (opts.margem && model.receita) ? (val / Math.abs(model.receita)) * 100 : null;
-    const trend = ah == null ? '' :
-      `<span class="kpi-trend ${dreAhClass(ah)}">${dreAhArrow(ah)} ${dreFmtPct(ah * 100)}</span>`;
-    const margemHtml = margem != null ? `<div class="kpi-margin">Margem ${dreFmtPct(margem)}</div>` : '';
-    const cls = role === 'liquido' ? 'kpi-gold' : (val < 0 ? 'kpi-danger' : '');
-    cards.push(`<div class="kpi-card ${cls}">
-      <div class="kpi-label"><i class="ti ${opts.icon || 'ti-coin'}"></i> ${label}</div>
-      <div class="kpi-value">${dreFmtMoney(val)}${trend}</div>
-      ${margemHtml || '<div class="kpi-sub">vs. exercício anterior</div>'}
-    </div>`);
-  };
-  mk('Receita', 'receita', { icon: 'ti-cash', margem: false });
-  mk('Resultado Bruto', 'bruto', { icon: 'ti-businessplan', margem: true });
-  if (model.papeis.ebit) mk('EBIT', 'ebit', { icon: 'ti-chart-arcs', margem: true });
-  mk('Lucro Líquido', 'liquido', { icon: 'ti-trophy', margem: true });
-  document.getElementById('dre-kpis').innerHTML = cards.join('');
-}
-
 function dreRenderTabela(model) {
   const body = document.getElementById('dre-body');
-  document.getElementById('dre-table-count').textContent = model.linhas.length + ' linha(s) · template ' + model.templateNome;
-  document.getElementById('dre-th-penultimo').style.display = model.temPenultimo ? '' : 'none';
+  document.getElementById('dre-table-count').textContent =
+    `${model.linhas.length} linha(s) · ${model.periodo.label} (${model.periodo.mesesLabel}) · template ${model.templateNome}`;
+  document.getElementById('dre-th-atual').textContent = model.periodo.label;
 
-  // mapeia filhos para colapso por pai de nível 2
-  body.innerHTML = model.linhas.map((l, i) => {
+  body.innerHTML = model.linhas.map((l) => {
     const indent = (l.nivel - 2) * 16;
     const temFilho = model.linhas.some(o => o.cd !== l.cd && o.cd.startsWith(l.cd + '.'));
     const rowCls = l.tipo === 'total' ? 'total' : l.tipo === 'subtotal' ? 'subtotal' : l.tipo === 'info' ? 'info' : '';
     const grupoPai = l.nivel > 2 ? (l.cd.split('.').slice(0, 2).join('.')) : '';
-    const ahHtml = l.ah == null ? '<span class="dre-av">—</span>'
-      : `<span class="dre-ah ${dreAhClass(l.ah)}">${dreAhArrow(l.ah)} ${dreFmtPct(l.ah * 100)}</span>`;
     const avHtml = l.av == null ? '—' : `<span class="dre-av">${dreFmtPct(l.av)}</span>`;
     const toggle = temFilho
       ? `<span class="dre-toggle" data-cd="${l.cd}"><i class="ti ti-chevron-down"></i></span>`
@@ -1956,9 +2041,7 @@ function dreRenderTabela(model) {
     return `<tr class="dre-row dre-lvl-${l.nivel} ${rowCls}" data-cd="${l.cd}" data-pai="${grupoPai}">
       <td>${toggle}</td>
       <td class="dre-desc" style="padding-left:${14 + indent}px;" title="${(l.ds || '').replace(/"/g, '&quot;')}">${l.ds || l.cd}</td>
-      <td class="col-num">${dreFmtMoney(l.ultimo)}</td>
-      <td class="col-num" ${model.temPenultimo ? '' : 'style="display:none;"'}>${dreFmtMoney(l.penultimo)}</td>
-      <td class="col-num">${ahHtml}</td>
+      <td class="col-num">${dreFmtMoney(l.atual)}</td>
       <td class="col-num">${avHtml}</td>
     </tr>`;
   }).join('');
@@ -1980,183 +2063,14 @@ function dreToggleGrupo(tg) {
   });
 }
 
-/* ---------- waterfall (SVG inline) ---------- */
-function dreRenderWaterfall(model) {
-  const seq = ['receita', 'custo', 'bruto', 'operacionais', 'ebit', 'financeiro', 'antesTributos', 'tributos', 'liquido'];
-  const steps = [];
-  let running = 0;
-  for (const role of seq) {
-    if (!model.papeis[role]) continue;
-    const v = model.roleVal(role);
-    if (v == null) continue;
-    const info = model.papeis[role];
-    const isTotal = info.tipo === 'total' || info.tipo === 'subtotal' || role === 'receita';
-    if (isTotal) {
-      steps.push({ label: info.rotulo, role, kind: 'total', start: 0, end: v, value: v });
-      running = v;
-    } else {
-      steps.push({ label: info.rotulo, role, kind: 'delta', start: running, end: running + v, value: v });
-      running += v;
-    }
-  }
-  const host = document.getElementById('dre-waterfall');
-  if (steps.length < 2) { host.innerHTML = '<div class="dre-ac-empty">Dados insuficientes para o gráfico.</div>'; return; }
-
-  const W = 860, H = 300, padT = 24, padB = 70, padL = 10, padR = 10;
-  const plotH = H - padT - padB, plotW = W - padL - padR;
-  const allVals = steps.flatMap(s => [s.start, s.end]);
-  const maxV = Math.max(0, ...allVals), minV = Math.min(0, ...allVals);
-  const span = (maxV - minV) || 1;
-  const y = v => padT + plotH * (1 - (v - minV) / span);
-  const bw = plotW / steps.length * 0.6;
-  const gap = plotW / steps.length;
-
-  let svg = `<svg class="dre-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
-  svg += `<line x1="${padL}" y1="${y(0)}" x2="${W - padR}" y2="${y(0)}" stroke="var(--border-strong)"/>`;
-  steps.forEach((s, i) => {
-    const cx = padL + gap * i + gap / 2;
-    const x = cx - bw / 2;
-    const yTop = y(Math.max(s.start, s.end));
-    const h = Math.max(1, Math.abs(y(s.start) - y(s.end)));
-    const cls = s.kind === 'total' ? 'wf-bar-total' : (s.value >= 0 ? 'wf-bar-pos' : 'wf-bar-neg');
-    svg += `<rect class="${cls}" x="${x}" y="${yTop}" width="${bw}" height="${h}" rx="2"><title>${s.label}: ${dreFmtMoney(s.value)}</title></rect>`;
-    svg += `<text class="wf-value" x="${cx}" y="${yTop - 5}" text-anchor="middle">${dreFmtMoney(s.value)}</text>`;
-    if (i < steps.length - 1) {
-      const yc = y(s.end);
-      svg += `<line class="wf-connector" x1="${x + bw}" y1="${yc}" x2="${padL + gap * (i + 1) + gap / 2 - bw / 2}" y2="${yc}"/>`;
-    }
-    const words = s.label.split(' ');
-    const lines = [];
-    let cur = '';
-    words.forEach(w => { if ((cur + ' ' + w).trim().length > 16) { lines.push(cur.trim()); cur = w; } else cur += ' ' + w; });
-    if (cur.trim()) lines.push(cur.trim());
-    lines.slice(0, 2).forEach((ln, li) => {
-      svg += `<text class="wf-label" x="${cx}" y="${H - padB + 16 + li * 11}" text-anchor="middle">${ln}</text>`;
-    });
-  });
-  svg += '</svg>';
-  host.innerHTML = svg;
-}
-
-/* ---------- aba tendência ---------- */
-function dreSwitchTab(tab) {
-  document.querySelectorAll('.dre-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.querySelectorAll('.dre-pane').forEach(p => p.classList.toggle('active', p.id === 'dre-pane-' + tab));
-}
-
-function dreSerie(conjunto) {
-  const anos = dreState.anosDisp.slice().sort((a, b) => a - b);
-  const pts = [];
-  for (const ano of anos) {
-    const m = dreBuildModel(conjunto, ano);
-    if (!m) continue;
-    const receita = m.roleVal('receita'), bruto = m.roleVal('bruto'),
-      ebit = m.papeis.ebit ? m.roleVal('ebit') : null, liquido = m.roleVal('liquido');
-    pts.push({
-      ano, receita, bruto, ebit, liquido,
-      mBruta: receita ? bruto / Math.abs(receita) * 100 : null,
-      mEbit: (receita && ebit != null) ? ebit / Math.abs(receita) * 100 : null,
-      mLiquida: receita ? liquido / Math.abs(receita) * 100 : null,
-    });
-  }
-  return pts;
-}
-
-function dreRenderTendencia(conjunto) {
-  const pts = dreSerie(conjunto);
-  const anos = pts.map(p => p.ano);
-  const valSeries = [
-    { name: 'Receita', color: '#00C9BC', values: pts.map(p => p.receita) },
-    { name: 'Resultado Bruto', color: '#15399A', values: pts.map(p => p.bruto) },
-    { name: 'EBIT', color: '#8FC73E', values: pts.map(p => p.ebit) },
-    { name: 'Lucro Líquido', color: '#057E76', values: pts.map(p => p.liquido) },
-  ].filter(s => s.values.some(v => v != null));
-  dreDrawLineChart('dre-trend-chart', 'dre-trend-legend', anos, valSeries, dreFmtMoney);
-
-  const margSeries = [
-    { name: 'Margem Bruta', color: '#15399A', values: pts.map(p => p.mBruta) },
-    { name: 'Margem EBIT', color: '#8FC73E', values: pts.map(p => p.mEbit) },
-    { name: 'Margem Líquida', color: '#057E76', values: pts.map(p => p.mLiquida) },
-  ].filter(s => s.values.some(v => v != null));
-  dreDrawLineChart('dre-margin-chart', 'dre-margin-legend', anos, margSeries, v => dreFmtPct(v));
-
-  dreRenderTendenciaTabela(pts);
-}
-
-function dreRenderTendenciaTabela(pts) {
-  const head = document.getElementById('dre-trend-head');
-  const body = document.getElementById('dre-trend-body');
-  if (!pts.length) { head.innerHTML = ''; body.innerHTML = ''; return; }
-  head.innerHTML = '<th>Métrica</th>' + pts.map(p => `<th class="col-num">${p.ano}</th>`).join('');
-  const metrics = [
-    { label: 'Receita', key: 'receita', fmt: dreFmtMoney, ah: true },
-    { label: 'Resultado Bruto', key: 'bruto', fmt: dreFmtMoney, ah: true },
-    { label: 'EBIT', key: 'ebit', fmt: dreFmtMoney, ah: true },
-    { label: 'Lucro Líquido', key: 'liquido', fmt: dreFmtMoney, ah: true },
-    { label: 'Margem Bruta', key: 'mBruta', fmt: v => dreFmtPct(v), ah: false },
-    { label: 'Margem Líquida', key: 'mLiquida', fmt: v => dreFmtPct(v), ah: false },
-  ];
-  body.innerHTML = metrics.filter(m => pts.some(p => p[m.key] != null)).map(m => {
-    const cells = pts.map((p, i) => {
-      const v = p[m.key];
-      let ahHtml = '';
-      if (m.ah && i > 0) {
-        const prev = pts[i - 1][m.key];
-        if (prev != null && prev !== 0 && v != null) {
-          const ah = (v - prev) / Math.abs(prev);
-          ahHtml = ` <span class="dre-ah ${dreAhClass(ah)}">${dreAhArrow(ah)} ${dreFmtPct(ah * 100)}</span>`;
-        }
-      }
-      return `<td class="col-num">${m.fmt(v)}${ahHtml}</td>`;
-    }).join('');
-    return `<tr><td class="dre-desc">${m.label}</td>${cells}</tr>`;
-  }).join('');
-}
-
-function dreDrawLineChart(hostId, legendId, anos, series, fmtY) {
-  const host = document.getElementById(hostId);
-  if (!anos.length || !series.length) { host.innerHTML = '<div class="dre-ac-empty">Sem dados para o período.</div>'; document.getElementById(legendId).innerHTML = ''; return; }
-  const W = 860, H = 280, padT = 18, padB = 34, padL = 64, padR = 18;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
-  const allV = series.flatMap(s => s.values).filter(v => v != null);
-  let maxV = Math.max(...allV, 0), minV = Math.min(...allV, 0);
-  if (maxV === minV) maxV = minV + 1;
-  const pad = (maxV - minV) * 0.08; maxV += pad; minV -= pad;
-  const span = maxV - minV;
-  const x = i => anos.length === 1 ? padL + plotW / 2 : padL + plotW * i / (anos.length - 1);
-  const y = v => padT + plotH * (1 - (v - minV) / span);
-
-  let svg = `<svg class="dre-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
-  for (let g = 0; g <= 4; g++) {
-    const gv = minV + span * g / 4;
-    const gy = y(gv);
-    svg += `<line class="trend-grid-line" x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}"/>`;
-    svg += `<text class="trend-axis-label" x="${padL - 8}" y="${gy + 3}" text-anchor="end">${fmtY(gv)}</text>`;
-  }
-  anos.forEach((a, i) => {
-    svg += `<text class="trend-axis-label" x="${x(i)}" y="${H - padB + 18}" text-anchor="middle">${a}</text>`;
-  });
-  series.forEach(s => {
-    const pdef = s.values.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean);
-    if (pdef.length > 1) svg += `<polyline class="trend-line" stroke="${s.color}" points="${pdef.join(' ')}"/>`;
-    s.values.forEach((v, i) => { if (v != null) svg += `<circle class="trend-dot" cx="${x(i)}" cy="${y(v)}" r="3.5" fill="${s.color}"><title>${s.name} ${anos[i]}: ${fmtY(v)}</title></circle>`; });
-  });
-  svg += '</svg>';
-  host.innerHTML = svg;
-  document.getElementById(legendId).innerHTML = series.map(s =>
-    `<div class="dre-legend-item"><span class="dre-legend-swatch" style="background:${s.color}"></span>${s.name}</div>`).join('');
-}
-
 /* ---------- export CSV ---------- */
 function dreExportCsv() {
   const m = dreState.modelo;
   if (!m || !m.linhas.length) { toast('Nada para exportar.', true); return; }
-  const head = ['CD_CONTA', 'Descricao', 'Papel', 'Ultimo', 'Penultimo', 'AH%', 'AV%'];
+  const head = ['CD_CONTA', 'Descricao', 'Papel', 'Valor', 'AV%'];
   const linhas = m.linhas.map(l => [
     l.cd, l.ds, l.role || '',
-    (l.ultimo ?? '').toString().replace('.', ','),
-    (l.penultimo == null ? '' : l.penultimo.toString().replace('.', ',')),
-    (l.ah == null ? '' : (l.ah * 100).toFixed(1).replace('.', ',')),
+    (l.atual ?? '').toString().replace('.', ','),
     (l.av == null ? '' : l.av.toFixed(1).replace('.', ',')),
   ]);
   const csv = [head.join(';')].concat(
@@ -2166,9 +2080,376 @@ function dreExportCsv() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   const nome = (dreState.empresa.denominacao || dreState.empresa.cnpjNum).replace(/[^\w]+/g, '-').slice(0, 40);
-  const ano = document.getElementById('dre-ano').value;
+  const periodo = m.periodo.label.replace(/\s+/g, '');
   const conj = document.getElementById('dre-conjunto').value;
-  a.download = `dre-${nome}-${ano}-${conj}.csv`;
+  a.download = `dre-${nome}-${periodo}-${conj}.csv`;
+  a.click();
+}
+
+/* ============================================================
+   LEITURA DE ITR (TRIMESTRAL)
+   Reaproveita o dicionario/deteccao de template da DRE (dreState.dict)
+   e helpers (dreNorm/dreNivel/dreCmpCd/dreEscala/dreFmtMoney/dreFmtPct).
+   Os valores ja vem de-acumulados do backend (api/itr/.../dre/trimestral).
+   ============================================================ */
+const itrState = {
+  inited: false,
+  empresa: null,      // { cnpjNum, denominacao, cdCvm, ultimoAno }
+  rows: [],           // linhas trimestrais (todos anos/conjuntos/trimestres)
+  conjuntosDisp: [],
+  periodos: [],
+  trimestre: null,    // trimestre selecionado (1..4)
+  modelo: null,
+};
+let itrBuscaTimer = null;
+let itrAcItems = [];
+let itrAcActive = -1;
+
+async function loadItr() {
+  if (itrState.inited) return;
+  itrState.inited = true;
+  await itrEnsureDict();
+  itrBindEvents();
+}
+
+async function itrEnsureDict() {
+  if (dreState.dict) return;
+  try {
+    const res = await fetch('assets/dre-dicionario.json', { cache: 'no-cache' });
+    if (res.ok) dreState.dict = await res.json();
+  } catch { /* segue com fallback */ }
+  if (!dreState.dict) dreState.dict = dreDictFallback();
+}
+
+function itrBindEvents() {
+  const busca = document.getElementById('itr-busca');
+  busca.addEventListener('input', () => {
+    clearTimeout(itrBuscaTimer);
+    const q = busca.value.trim();
+    if (q.length < 2) { itrFecharAutocomplete(); return; }
+    itrBuscaTimer = setTimeout(() => itrBuscarEmpresas(q), 280);
+  });
+  busca.addEventListener('keydown', itrAcKeydown);
+  busca.addEventListener('focus', () => { if (itrAcItems.length) document.getElementById('itr-autocomplete').classList.add('open'); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#view-itr .dre-search')) itrFecharAutocomplete(); });
+  document.getElementById('itr-conjunto').addEventListener('change', () => { itrState.trimestre = null; itrRender(); });
+  document.getElementById('itr-ano').addEventListener('change', () => { itrState.trimestre = null; itrRender(); });
+  document.getElementById('itr-periodo').addEventListener('change', (e) => { itrState.trimestre = parseInt(e.target.value, 10); itrRender(); });
+  document.getElementById('itr-modo').addEventListener('change', itrRender);
+  document.getElementById('btn-itr-analisar').addEventListener('click', itrAnalisar);
+  document.getElementById('btn-itr-export').addEventListener('click', itrExportCsv);
+}
+
+/* ---------- autocomplete de companhia ---------- */
+async function itrBuscarEmpresas(q) {
+  const box = document.getElementById('itr-autocomplete');
+  box.classList.add('open');
+  box.innerHTML = '<div class="dre-ac-empty"><i class="ti ti-loader-2 spin"></i> Buscando...</div>';
+  try {
+    const res = await authFetch('api/itr/empresas?limite=20&busca=' + encodeURIComponent(q));
+    if (!res.ok) { box.innerHTML = '<div class="dre-ac-empty">Não foi possível buscar companhias.</div>'; return; }
+    const list = await res.json();
+    itrAcItems = Array.isArray(list) ? list : [];
+    itrAcActive = -1;
+    if (!itrAcItems.length) { box.innerHTML = '<div class="dre-ac-empty">Nenhuma companhia com ITR encontrada.</div>'; return; }
+    box.innerHTML = itrAcItems.map((e, i) => `
+      <div class="dre-ac-item" data-i="${i}">
+        <div class="dre-ac-name">${(e.denominacao || '—')}</div>
+        <div class="dre-ac-meta">${formatDoc(e.cnpjNum)} · CVM ${e.cdCvm || '—'} · ${e.qtdAnos} ano(s) · até ${e.ultimoAno || '—'}</div>
+      </div>`).join('');
+    box.querySelectorAll('.dre-ac-item').forEach(el =>
+      el.addEventListener('click', () => itrSelecionarEmpresa(itrAcItems[parseInt(el.dataset.i, 10)])));
+  } catch {
+    box.innerHTML = '<div class="dre-ac-empty">Falha de conexão na busca.</div>';
+  }
+}
+function itrAcKeydown(e) {
+  const box = document.getElementById('itr-autocomplete');
+  if (!box.classList.contains('open') || !itrAcItems.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    itrAcActive += e.key === 'ArrowDown' ? 1 : -1;
+    if (itrAcActive < 0) itrAcActive = itrAcItems.length - 1;
+    if (itrAcActive >= itrAcItems.length) itrAcActive = 0;
+    box.querySelectorAll('.dre-ac-item').forEach((el, i) => el.classList.toggle('active', i === itrAcActive));
+  } else if (e.key === 'Enter') {
+    if (itrAcActive >= 0) { e.preventDefault(); itrSelecionarEmpresa(itrAcItems[itrAcActive]); }
+  } else if (e.key === 'Escape') {
+    itrFecharAutocomplete();
+  }
+}
+function itrFecharAutocomplete() { document.getElementById('itr-autocomplete').classList.remove('open'); }
+
+function itrSelecionarEmpresa(emp) {
+  if (!emp) return;
+  itrState.empresa = emp;
+  document.getElementById('itr-busca').value = emp.denominacao || emp.cnpjNum;
+  itrFecharAutocomplete();
+  document.getElementById('btn-itr-analisar').disabled = false;
+  itrAnalisar();
+}
+
+/* ---------- análise: carrega série trimestral e renderiza ---------- */
+async function itrAnalisar() {
+  if (!itrState.empresa) return;
+  const cnpj = itrState.empresa.cnpjNum;
+  const btn = document.getElementById('btn-itr-analisar');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Analisando...';
+  itrMostrarVazio('<i class="ti ti-loader-2 spin dre-empty-icon"></i><div>Carregando série trimestral...</div>', true);
+  try {
+    const res = await authFetch('api/itr/' + encodeURIComponent(cnpj) + '/dre/trimestral');
+    if (!res.ok) {
+      const d = await parseJson(res);
+      itrMostrarVazio('<i class="ti ti-alert-triangle dre-empty-icon"></i><div>' + (d.message || 'Falha ao carregar a DRE trimestral.') + '</div>');
+      return;
+    }
+    const rows = await res.json();
+    itrState.rows = (Array.isArray(rows) ? rows : []).filter(r => r.cdConta);
+    if (!itrState.rows.length) {
+      itrMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Esta companhia não possui DRE trimestral calculada. Importe um ITR e/ou o DFP anual.</div>');
+      return;
+    }
+    itrState.conjuntosDisp = [...new Set(itrState.rows.map(r => (r.conjunto || '').toUpperCase()).filter(Boolean))];
+    itrState.trimestre = null;
+    itrPrepararFiltros();
+    itrRender();
+  } catch {
+    itrMostrarVazio('<i class="ti ti-plug-connected-x dre-empty-icon"></i><div>Sem conexão com o servidor.</div>');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-chart-bar"></i> Analisar';
+  }
+}
+
+function itrPrepararFiltros() {
+  const anos = [...new Set(itrState.rows.map(r => r.ano).filter(v => v != null))].sort((a, b) => b - a);
+  const selAno = document.getElementById('itr-ano');
+  selAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  selAno.disabled = false;
+  const selConj = document.getElementById('itr-conjunto');
+  selConj.disabled = false;
+  [...selConj.options].forEach(o => { o.disabled = !itrState.conjuntosDisp.includes(o.value); });
+  if (!itrState.conjuntosDisp.includes(selConj.value)) {
+    selConj.value = itrState.conjuntosDisp.includes('CON') ? 'CON' : (itrState.conjuntosDisp[0] || 'CON');
+  }
+  document.getElementById('itr-modo').disabled = false;
+}
+
+function itrMostrarVazio(html, manterCompany = false) {
+  document.getElementById('itr-content').classList.add('app-hidden');
+  if (!manterCompany) document.getElementById('itr-company').classList.remove('show');
+  const empty = document.getElementById('itr-empty');
+  empty.style.display = 'block';
+  empty.innerHTML = html;
+  document.getElementById('btn-itr-export').disabled = true;
+}
+
+/* ---------- agrupa por (conjunto, ano, trimestre) ---------- */
+function itrListarPeriodos(rows, conjunto) {
+  const base = rows.filter(r => (r.conjunto || '').toUpperCase() === conjunto && r.cdConta);
+  const grupos = new Map();
+  for (const r of base) {
+    if (r.ano == null || r.trimestre == null) continue;
+    const key = conjunto + '|' + r.ano + '|' + r.trimestre;
+    let g = grupos.get(key);
+    if (!g) {
+      g = { key, ano: r.ano, trimestre: r.trimestre, conjunto, rows: [], origem: r.origemTrimestre, inconsistente: false, motivos: new Set() };
+      grupos.set(key, g);
+    }
+    g.rows.push(r);
+    if (r.inconsistente) { g.inconsistente = true; if (r.motivoInconsistencia) g.motivos.add(r.motivoInconsistencia); }
+  }
+  const periodos = [];
+  for (const g of grupos.values()) {
+    const escala = dreEscala(g.rows[0].escalaMoeda);
+    const contaMap = new Map();
+    for (const r of g.rows) contaMap.set(r.cdConta, {
+      cd: r.cdConta, ds: r.dsConta,
+      valTri: (r.valorTrimestral || 0) * escala,
+      valAcc: (r.valorAcumulado || 0) * escala,
+    });
+    g.escala = escala;
+    g.contas = [...contaMap.values()];
+    g.denom = g.rows[0].denominacao;
+    g.cdCvm = g.rows[0].cdCvm;
+    g.label = 'T' + g.trimestre + ' ' + g.ano;
+    g.optLabel = 'T' + g.trimestre + ' · ' + g.ano + (g.inconsistente ? ' ⚠' : '');
+    g.motivo = [...g.motivos].join(' ');
+    periodos.push(g);
+  }
+  periodos.sort((a, b) => (a.ano * 10 + a.trimestre) - (b.ano * 10 + b.trimestre));
+  return periodos;
+}
+
+function itrBuildModel(conjunto, ano, trimestre, modo) {
+  const todos = itrListarPeriodos(itrState.rows, conjunto);
+  if (!todos.length) return null;
+  const atual = todos.find(p => p.ano === ano && p.trimestre === trimestre) || todos[todos.length - 1];
+
+  const tplKey = dreDetectTemplate(atual.contas);
+  const tpl = dreState.dict.templates[tplKey];
+  const papeis = tpl.papeis || {};
+  const cdRole = {};
+  for (const [role, info] of Object.entries(papeis)) cdRole[info.cd] = { role, ...info };
+
+  const valOf = c => (modo === 'acumulado' ? c.valAcc : c.valTri);
+  const valMap = {};
+  atual.contas.forEach(c => { valMap[c.cd] = valOf(c); });
+  const receitaCd = papeis.receita ? papeis.receita.cd : null;
+  const receita = receitaCd != null ? (valMap.hasOwnProperty(receitaCd) ? valMap[receitaCd] : null) : null;
+
+  const linhas = atual.contas.slice().sort((a, b) => dreCmpCd(a.cd, b.cd)).map(c => {
+    const at = valOf(c);
+    const av = (receita && receita !== 0) ? (at / Math.abs(receita)) * 100 : null;
+    const papel = cdRole[c.cd] || null;
+    return {
+      cd: c.cd, nivel: dreNivel(c.cd),
+      ds: c.ds || (papel ? papel.rotulo : c.cd),
+      role: papel ? papel.role : null,
+      tipo: papel ? papel.tipo : null,
+      atual: at, av,
+    };
+  });
+
+  return {
+    templateKey: tplKey, templateNome: tpl.nome || tplKey,
+    escala: atual.escala, periodo: atual, receita, linhas, modo,
+  };
+}
+
+/* ---------- render principal ---------- */
+function itrRender() {
+  if (!itrState.rows.length) return;
+  const conjunto = document.getElementById('itr-conjunto').value;
+  const todos = itrListarPeriodos(itrState.rows, conjunto);
+  itrState.periodos = todos;
+  if (!todos.length) {
+    itrMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem DRE trimestral para ' + (conjunto === 'CON' ? 'Consolidado' : 'Individual') + '.</div>', true);
+    return;
+  }
+
+  const anos = [...new Set(todos.map(p => p.ano))].sort((a, b) => b - a);
+  const selAno = document.getElementById('itr-ano');
+  let ano = parseInt(selAno.value, 10);
+  if (!anos.includes(ano)) ano = anos[0];
+  const optsAtual = [...selAno.options].map(o => o.value).join(',');
+  if (optsAtual !== anos.join(',')) selAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  selAno.value = ano; selAno.disabled = false;
+
+  const doAno = todos.filter(p => p.ano === ano).sort((a, b) => b.trimestre - a.trimestre);
+  const selPer = document.getElementById('itr-periodo');
+  selPer.innerHTML = doAno.map(p => `<option value="${p.trimestre}">${p.optLabel}</option>`).join('');
+  selPer.disabled = !doAno.length;
+
+  let trimestre = itrState.trimestre;
+  if (!doAno.some(p => p.trimestre === trimestre)) trimestre = doAno.length ? doAno[0].trimestre : null;
+  itrState.trimestre = trimestre;
+  selPer.value = trimestre != null ? String(trimestre) : '';
+
+  const modo = document.getElementById('itr-modo').value;
+  const model = itrBuildModel(conjunto, ano, trimestre, modo);
+  itrState.modelo = model;
+  if (!model) {
+    itrMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados para o período selecionado.</div>', true);
+    return;
+  }
+
+  document.getElementById('itr-empty').style.display = 'none';
+  document.getElementById('itr-content').classList.remove('app-hidden');
+  document.getElementById('btn-itr-export').disabled = false;
+  itrRenderCompany(model, conjunto);
+  itrRenderTabela(model);
+}
+
+function itrRenderCompany(model, conjunto) {
+  const card = document.getElementById('itr-company');
+  card.classList.add('show');
+  const e = itrState.empresa;
+  const p = model.periodo;
+  document.getElementById('itr-co-name').textContent = p.denom || e.denominacao || '—';
+  document.getElementById('itr-co-cnpj').textContent = formatDoc(e.cnpjNum);
+  document.getElementById('itr-co-cvm').textContent = p.cdCvm || e.cdCvm || '—';
+  document.getElementById('itr-co-ano').textContent = p.label;
+  document.getElementById('itr-co-conjunto').textContent = conjunto === 'CON' ? 'Consolidado' : 'Individual';
+  document.getElementById('itr-co-modo').textContent = model.modo === 'acumulado' ? 'Acumulado' : 'Trimestral';
+  const origem = p.origem === 'DFP' ? 'DFP (anual)' : p.origem === 'ITR' ? 'ITR' : '—';
+  document.getElementById('itr-co-origem').textContent = origem;
+  document.getElementById('itr-co-template').innerHTML = '<i class="ti ti-tag"></i> ' + model.templateNome;
+
+  const banner = document.getElementById('itr-incons');
+  if (p.inconsistente) {
+    banner.style.display = '';
+    document.getElementById('itr-incons-msg').innerHTML =
+      '<i class="ti ti-alert-triangle"></i> Série trimestral inconsistente neste período' + (p.motivo ? (': ' + p.motivo) : '.');
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function itrRenderTabela(model) {
+  const body = document.getElementById('itr-body');
+  const p = model.periodo;
+  const origemBadge = p.origem === 'DFP'
+    ? ' · <span class="badge b-warn"><i class="ti ti-calendar"></i> 4T via DFP</span>'
+    : p.origem === 'ITR' ? ' · <span class="badge b-con"><i class="ti ti-calendar-stats"></i> ITR</span>' : '';
+  document.getElementById('itr-table-count').innerHTML =
+    `${model.linhas.length} linha(s) · ${p.label} · ${model.modo === 'acumulado' ? 'acumulado' : 'trimestral'} · template ${model.templateNome}${origemBadge}`;
+  document.getElementById('itr-th-atual').textContent = p.label + (model.modo === 'acumulado' ? ' (acum.)' : '');
+
+  body.innerHTML = model.linhas.map((l) => {
+    const indent = (l.nivel - 2) * 16;
+    const temFilho = model.linhas.some(o => o.cd !== l.cd && o.cd.startsWith(l.cd + '.'));
+    const rowCls = l.tipo === 'total' ? 'total' : l.tipo === 'subtotal' ? 'subtotal' : l.tipo === 'info' ? 'info' : '';
+    const grupoPai = l.nivel > 2 ? (l.cd.split('.').slice(0, 2).join('.')) : '';
+    const avHtml = l.av == null ? '—' : `<span class="dre-av">${dreFmtPct(l.av)}</span>`;
+    const toggle = temFilho
+      ? `<span class="dre-toggle" data-cd="${l.cd}"><i class="ti ti-chevron-down"></i></span>`
+      : '<span class="dre-toggle empty"></span>';
+    return `<tr class="dre-row dre-lvl-${l.nivel} ${rowCls}" data-cd="${l.cd}" data-pai="${grupoPai}">
+      <td>${toggle}</td>
+      <td class="dre-desc" style="padding-left:${14 + indent}px;" title="${(l.ds || '').replace(/"/g, '&quot;')}">${l.ds || l.cd}</td>
+      <td class="col-num">${dreFmtMoney(l.atual)}</td>
+      <td class="col-num">${avHtml}</td>
+    </tr>`;
+  }).join('');
+
+  body.querySelectorAll('.dre-toggle[data-cd]').forEach(tg =>
+    tg.addEventListener('click', () => itrToggleGrupo(tg)));
+}
+
+function itrToggleGrupo(tg) {
+  const cd = tg.dataset.cd;
+  const icon = tg.querySelector('i');
+  const colapsar = !tg.classList.contains('collapsed');
+  tg.classList.toggle('collapsed', colapsar);
+  icon.className = colapsar ? 'ti ti-chevron-right' : 'ti ti-chevron-down';
+  document.querySelectorAll('#itr-body .dre-row').forEach(row => {
+    if (row.dataset.cd !== cd && row.dataset.cd.startsWith(cd + '.')) {
+      row.classList.toggle('collapsed-child', colapsar);
+    }
+  });
+}
+
+/* ---------- export CSV ---------- */
+function itrExportCsv() {
+  const m = itrState.modelo;
+  if (!m || !m.linhas.length) { toast('Nada para exportar.', true); return; }
+  const p = m.periodo;
+  const head = ['CD_CONTA', 'Descricao', 'Papel', 'Trimestre', 'Visao', 'Valor', 'AV%'];
+  const linhas = m.linhas.map(l => [
+    l.cd, l.ds, l.role || '',
+    p.label, m.modo === 'acumulado' ? 'Acumulado' : 'Trimestral',
+    (l.atual ?? '').toString().replace('.', ','),
+    (l.av == null ? '' : l.av.toFixed(1).replace('.', ',')),
+  ]);
+  const csv = [head.join(';')].concat(
+    linhas.map(r => r.map(c => `"${(c ?? '').toString().replace(/"/g, '""')}"`).join(';'))
+  ).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = (itrState.empresa.denominacao || itrState.empresa.cnpjNum).replace(/[^\w]+/g, '-').slice(0, 40);
+  const conj = document.getElementById('itr-conjunto').value;
+  a.download = `itr-${nome}-${p.label.replace(/\s+/g, '')}-${conj}-${m.modo}.csv`;
   a.click();
 }
 

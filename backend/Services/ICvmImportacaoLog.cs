@@ -1,11 +1,13 @@
 namespace AustralCreditAnalytics.Api.Services;
 
 /// <summary>
-/// Registra o ciclo de vida de cada importacao DFP no ledger <c>dfp.Importacao</c>:
-/// abre a linha (status Processando) antes da carga, atualiza as contagens durante o
-/// processamento e finaliza com o status terminal (Concluido/Falha/Cancelado).
+/// Registra o ciclo de vida de cada importacao CVM no ledger informado
+/// (<paramref name="ledgerTabela"/>, ex.: dfp.Importacao ou itr.Importacao): abre a
+/// linha (status Processando), atualiza contagens parciais e finaliza com o status
+/// terminal. O nucleo de import (<see cref="CvmCsvImporter"/>) usa esta abstracao
+/// para nao depender de uma base especifica.
 /// </summary>
-public interface IDfpImportacaoLog
+public interface ICvmImportacaoLog
 {
     /// <summary>
     /// Abre uma linha no ledger (status Processando) e retorna o <c>Id</c> gerado, usado
@@ -13,12 +15,12 @@ public interface IDfpImportacaoLog
     /// falhar (a importacao prossegue sem rastreio).
     /// </summary>
     Task<long?> IniciarAsync(
-        string tipo, string tabela, string? conjunto, int? ano, string arquivo, string? usuario,
-        CancellationToken ct = default);
+        string ledgerTabela, string tipo, string tabela, string? conjunto, int? ano,
+        string arquivo, string? usuario, CancellationToken ct = default);
 
     /// <summary>Atualiza as contagens parciais (removidas/lidas/importadas) da importacao.</summary>
     Task AtualizarAsync(
-        long id, int linhasRemovidas, int linhasLidas, int linhasImportadas,
+        string ledgerTabela, long id, int linhasRemovidas, int linhasLidas, int linhasImportadas,
         CancellationToken ct = default);
 
     /// <summary>
@@ -26,7 +28,7 @@ public interface IDfpImportacaoLog
     /// conjunto detectado e a data de conclusao.
     /// </summary>
     Task FinalizarAsync(
-        long id, string status, string? mensagem,
+        string ledgerTabela, long id, string status, string? mensagem,
         int linhasRemovidas, int linhasLidas, int linhasImportadas, string? conjunto,
         CancellationToken ct = default);
 }

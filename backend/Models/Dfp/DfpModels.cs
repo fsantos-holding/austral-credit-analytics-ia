@@ -95,6 +95,10 @@ public sealed class DfpImportJob
     private DateTime _atualizadoEm = DateTime.UtcNow;
 
     public string Id { get; } = Guid.NewGuid().ToString("N");
+
+    /// <summary>Base de origem do job: "DFP" (anual) ou "ITR" (trimestral). Define o dataset.</summary>
+    public string Base { get; init; } = "DFP";
+
     public string Tipo { get; init; } = string.Empty;
 
     /// <summary>Nome amigavel da demonstracao (descricao do registry).</summary>
