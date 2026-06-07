@@ -82,13 +82,17 @@ public sealed class DfpImportJobManager : IDfpImportJobManager
             var progresso = new Progress<(long bytes, int lidas, int importadas, int removidas, string? conjunto, int? ano)>(
                 p => job.AtualizarProgresso(p.bytes, p.lidas, p.importadas, p.removidas, p.conjunto, p.ano));
 
-            // Despacho por dataset: ITR grava em [itr], DFP em [dfp] (servicos isolados,
-            // mesma assinatura, sobre o nucleo compartilhado CvmCsvImporter).
-            var resultado = job.Base == "ITR"
-                ? await scope.ServiceProvider.GetRequiredService<IItrImportService>()
-                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct)
-                : await scope.ServiceProvider.GetRequiredService<IDfpImportService>()
-                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct);
+            // Despacho por dataset: FRE grava em [fre], ITR em [itr], DFP em [dfp] (servicos
+            // isolados, mesma assinatura, sobre o nucleo compartilhado CvmCsvImporter).
+            var resultado = job.Base switch
+            {
+                "FRE" => await scope.ServiceProvider.GetRequiredService<IFreImportService>()
+                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct),
+                "ITR" => await scope.ServiceProvider.GetRequiredService<IItrImportService>()
+                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct),
+                _ => await scope.ServiceProvider.GetRequiredService<IDfpImportService>()
+                    .ImportarArquivoAsync(job.Tipo, job.CaminhoTemp, job.Arquivo, job.Usuario, progresso, ct),
+            };
 
             job.AtualizarProgresso(
                 job.BytesTotais, resultado.LinhasLidas, resultado.LinhasImportadas,

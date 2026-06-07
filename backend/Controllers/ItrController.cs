@@ -17,6 +17,7 @@ public class ItrController : ControllerBase
     private readonly IDfpImportJobManager _jobs;
     private readonly IItrRepository _repository;
     private readonly ITrimestralizacaoService _engine;
+    private readonly IDreComparativoService _comparativo;
     private readonly ISqlConnectionFactory _factory;
     private readonly ISchemaInitializer _schema;
     private readonly IWebHostEnvironment _environment;
@@ -26,6 +27,7 @@ public class ItrController : ControllerBase
         IDfpImportJobManager jobs,
         IItrRepository repository,
         ITrimestralizacaoService engine,
+        IDreComparativoService comparativo,
         ISqlConnectionFactory factory,
         ISchemaInitializer schema,
         IWebHostEnvironment environment,
@@ -34,6 +36,7 @@ public class ItrController : ControllerBase
         _jobs = jobs;
         _repository = repository;
         _engine = engine;
+        _comparativo = comparativo;
         _factory = factory;
         _schema = schema;
         _environment = environment;
@@ -120,6 +123,30 @@ public class ItrController : ControllerBase
         [FromQuery] int? ano,
         CancellationToken ct)
         => Run(async () => Ok(await _repository.GetDreTrimestralAsync(cnpj, conjunto, ano, ct)), ct);
+
+    /// <summary>
+    /// Comparativo Penultimo x Ultimo da DRE (YoY por padrao). Filtros: <c>conjunto</c>
+    /// (CON/IND), <c>ano</c> (do periodo "ultimo"; padrao = mais recente) e <c>modo</c>
+    /// (<c>homologo</c> ou <c>sequencial</c>). Valores ja em R$.
+    /// </summary>
+    [HttpGet("{cnpj}/dre/comparativo")]
+    public Task<IActionResult> DreComparativo(
+        string cnpj,
+        [FromQuery] string? conjunto,
+        [FromQuery] int? ano,
+        [FromQuery] string? modo,
+        CancellationToken ct)
+        => Run(async () => Ok(await _comparativo.ObterAsync(
+            "ITR", cnpj, conjunto, ano, ParseModo(modo), ct)), ct);
+
+    /// <summary>Resolve o modo do comparativo (padrao Homologo). "sequencial"/"qoq" -> Sequencial.</summary>
+    private static Models.Itr.ModoComparativo ParseModo(string? modo)
+    {
+        var m = modo?.Trim().ToLowerInvariant();
+        return m is "sequencial" or "seq" or "qoq"
+            ? Models.Itr.ModoComparativo.Sequencial
+            : Models.Itr.ModoComparativo.Homologo;
+    }
 
     /// <summary>
     /// Recalcula a trimestralizacao sob demanda. Filtros opcionais (query): <c>cnpj</c>,

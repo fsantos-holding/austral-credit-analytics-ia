@@ -25,8 +25,9 @@ public class ItrRepository : IItrRepository
 
         const string sql = """
             SELECT CD_CVM, CnpjNum, DENOM_CIA, Ano, Trimestre, Conjunto,
-                   CD_CONTA, DS_CONTA, ValorTrimestral, ValorAcumulado,
-                   OrigemTrimestre, EscalaMoeda, Inconsistente, MotivoInconsistencia
+                   CD_CONTA, DS_CONTA, ST_CONTA_FIXA, ValorTrimestral, ValorAcumulado,
+                   OrigemTrimestre, EscalaMoeda, MoedaEstrangeira, ExercicioNaoCalendario,
+                   BaixaComparabilidade, Inconsistente, MotivoInconsistencia
             FROM itr.vw_DreTrimestral
             WHERE CnpjNum = @cnpjNum
               AND (@conjunto IS NULL OR Conjunto = @conjunto)

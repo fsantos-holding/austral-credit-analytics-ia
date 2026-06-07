@@ -15,6 +15,7 @@ public class DfpController : ControllerBase
 {
     private readonly IDfpImportJobManager _jobs;
     private readonly IDfpRepository _repository;
+    private readonly IDreComparativoService _comparativo;
     private readonly ISqlConnectionFactory _factory;
     private readonly ISchemaInitializer _schema;
     private readonly IWebHostEnvironment _environment;
@@ -23,6 +24,7 @@ public class DfpController : ControllerBase
     public DfpController(
         IDfpImportJobManager jobs,
         IDfpRepository repository,
+        IDreComparativoService comparativo,
         ISqlConnectionFactory factory,
         ISchemaInitializer schema,
         IWebHostEnvironment environment,
@@ -30,6 +32,7 @@ public class DfpController : ControllerBase
     {
         _jobs = jobs;
         _repository = repository;
+        _comparativo = comparativo;
         _factory = factory;
         _schema = schema;
         _environment = environment;
@@ -130,6 +133,30 @@ public class DfpController : ControllerBase
         [FromQuery] int? ano,
         CancellationToken ct)
         => Run(async () => Ok(await _repository.GetContasAsync(cnpj, tipo, dtRefer, ordem, conjunto, ano, ct)), ct);
+
+    /// <summary>
+    /// Comparativo Penultimo x Ultimo da DRE anual (YoY por padrao). Filtros: <c>conjunto</c>
+    /// (CON/IND), <c>ano</c> (do periodo "ultimo"; padrao = mais recente) e <c>modo</c>
+    /// (<c>homologo</c> ou <c>sequencial</c>). Valores ja em R$.
+    /// </summary>
+    [HttpGet("{cnpj}/dre/comparativo")]
+    public Task<IActionResult> DreComparativo(
+        string cnpj,
+        [FromQuery] string? conjunto,
+        [FromQuery] int? ano,
+        [FromQuery] string? modo,
+        CancellationToken ct)
+        => Run(async () => Ok(await _comparativo.ObterAsync(
+            "DFP", cnpj, conjunto, ano, ParseModo(modo), ct)), ct);
+
+    /// <summary>Resolve o modo do comparativo (padrao Homologo). "sequencial"/"qoq" -> Sequencial.</summary>
+    private static Models.Itr.ModoComparativo ParseModo(string? modo)
+    {
+        var m = modo?.Trim().ToLowerInvariant();
+        return m is "sequencial" or "seq" or "qoq"
+            ? Models.Itr.ModoComparativo.Sequencial
+            : Models.Itr.ModoComparativo.Homologo;
+    }
 
     /// <summary>
     /// Historico de importacoes (ledger dfp.Importacao), mais recente primeiro. Filtros

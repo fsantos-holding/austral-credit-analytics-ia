@@ -61,6 +61,11 @@ builder.Services.AddSingleton<IDfpImportJobManager, DfpImportJobManager>();
 builder.Services.AddScoped<IItrImportService, ItrImportService>();
 builder.Services.AddScoped<IItrRepository, ItrRepository>();
 builder.Services.AddScoped<ITrimestralizacaoService, TrimestralizacaoService>();
+builder.Services.AddScoped<IDreComparativoService, DreComparativoService>();
+
+// FRE (CVM, Formulario de Referencia): importacao dos ~50 modelos (schema [fre]) + leitura do grupo de capital.
+builder.Services.AddScoped<IFreImportService, FreImportService>();
+builder.Services.AddScoped<IFreRepository, FreRepository>();
 
 // Autenticacao/permissionamento: usuarios, perfis e log de atividades no proprio banco.
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();

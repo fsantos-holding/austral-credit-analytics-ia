@@ -62,4 +62,20 @@ public static class CvmDatasets
             return new CvmDemonstracaoDestino(dem, "itr.Dre");
         },
     };
+
+    /// <summary>
+    /// FRE (Formulario de Referencia, anual): todos os ~50 modelos do
+    /// <see cref="FreModeloRegistry"/>, gravados no schema [fre] (uma tabela por modelo).
+    /// Sem GRUPO_DFP -> sem conjunto (CON/IND); a reimportacao substitui por (Ano).
+    /// </summary>
+    public static readonly CvmDataset Fre = new()
+    {
+        Codigo = "FRE",
+        LedgerTabela = "fre.Importacao",
+        Resolver = tipo =>
+        {
+            var dem = FreModeloRegistry.Resolver(tipo);
+            return dem is null ? null : new CvmDemonstracaoDestino(dem, dem.Tabela);
+        },
+    };
 }

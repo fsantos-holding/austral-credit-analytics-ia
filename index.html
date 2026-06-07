@@ -358,6 +358,10 @@
   .dre-row.total td { font-weight: 700; font-size: 14px; color: var(--accent-ink); border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent); }
   .dre-row.info td { color: var(--text-muted); font-style: italic; }
   .dre-av { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; }
+  .cmp-pos { color: var(--success); font-weight: 600; }
+  .cmp-neg { color: var(--danger); font-weight: 600; }
+  .cmp-flags { display: inline-flex; gap: 5px; margin-left: 8px; vertical-align: middle; }
+  .cmp-flags .badge { padding: 1px 7px; }
 
   .dre-empty { background: var(--surface); border-radius: var(--radius-lg); border: 1px dashed var(--border-strong); padding: 56px 20px; text-align: center; color: var(--text-muted); }
   .dre-empty .dre-empty-icon { font-size: 38px; opacity: 0.6; display: block; margin-bottom: 12px; }
@@ -422,6 +426,8 @@
         <div class="nav-item active" data-view="credito"><i class="ti ti-chart-histogram"></i><span>Análise de Crédito</span></div>
         <div class="nav-item" data-view="dre"><i class="ti ti-report-money"></i><span>Leitura de DRE</span></div>
         <div class="nav-item" data-view="itr"><i class="ti ti-calendar-stats"></i><span>Leitura de ITR (Trimestral)</span></div>
+        <div class="nav-item" data-view="comparativo"><i class="ti ti-arrows-diff"></i><span>Comparativo de DRE</span></div>
+        <div class="nav-item" data-view="composicao"><i class="ti ti-chart-pie"></i><span>Composição Capital</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Dados</div>
@@ -666,12 +672,211 @@
         </div>
       </section>
 
+      <!-- ===== COMPARATIVO DE DRE (PENÚLTIMO × ÚLTIMO) ===== -->
+      <section class="view" id="view-comparativo">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Comparativo de DRE (Penúltimo × Último)</div>
+            <div class="page-subtitle">Análise horizontal: período corrente vs. mesmo período do ano anterior (homólogo/YoY) ou trimestre anterior (sequencial/QoQ). Valores já em R$.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="btn-cmp-export" disabled><i class="ti ti-download"></i> Exportar CSV</button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="dre-search">
+            <div class="search-box">
+              <i class="ti ti-search"></i>
+              <input type="text" id="cmp-busca" placeholder="Buscar companhia por razão social ou CNPJ..." autocomplete="off">
+            </div>
+            <div class="dre-autocomplete" id="cmp-autocomplete"></div>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Base</label>
+            <select class="filter-select" id="cmp-base">
+              <option value="ITR">ITR (trimestral)</option>
+              <option value="DFP">DFP (anual)</option>
+            </select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
+            <select class="filter-select" id="cmp-ano" disabled><option>—</option></select>
+          </div>
+          <select class="filter-select" id="cmp-conjunto" disabled>
+            <option value="CON">Consolidado</option>
+            <option value="IND">Individual</option>
+          </select>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;" title="Homólogo: mesmo período do ano anterior (YoY), elimina sazonalidade. Sequencial: trimestre imediatamente anterior (QoQ), sensível a sazonalidade.">Modo</label>
+            <select class="filter-select" id="cmp-modo">
+              <option value="homologo">Homólogo (YoY)</option>
+              <option value="sequencial">Sequencial (QoQ)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-cmp-analisar" disabled><i class="ti ti-chart-bar"></i> Comparar</button>
+        </div>
+
+        <!-- Cabeçalho da companhia -->
+        <div class="dre-company" id="cmp-company">
+          <div class="dre-company-top">
+            <div>
+              <div class="dre-company-name" id="cmp-co-name">—</div>
+              <div class="dre-company-cnpj" id="cmp-co-cnpj">—</div>
+            </div>
+            <span class="dre-template-pill" id="cmp-co-modo"><i class="ti ti-arrows-diff"></i> —</span>
+          </div>
+          <div class="dre-company-meta">
+            <div class="dre-cm-item"><span class="dre-cm-l">Base</span><span class="dre-cm-v" id="cmp-co-base">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Conjunto</span><span class="dre-cm-v" id="cmp-co-conjunto">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Período (Último)</span><span class="dre-cm-v" id="cmp-co-ultimo">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Período (Penúltimo)</span><span class="dre-cm-v" id="cmp-co-penultimo">—</span></div>
+          </div>
+        </div>
+
+        <!-- Estado vazio / carregando -->
+        <div class="dre-empty" id="cmp-empty">
+          <i class="ti ti-arrows-diff dre-empty-icon"></i>
+          <div id="cmp-empty-msg">Selecione uma companhia para comparar dois períodos da DRE.</div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="cmp-content" class="app-hidden">
+          <div id="cmp-aviso" style="display:none;margin-bottom:14px;padding:11px 14px;border-radius:8px;border:1px solid rgba(245,158,11,0.45);background:rgba(245,158,11,0.12);color:var(--warning);font-size:13px;">
+            <span id="cmp-aviso-msg"></span>
+          </div>
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Demonstração do Resultado · Comparativo</div>
+              <div class="table-count" id="cmp-table-count">—</div>
+            </div>
+            <div class="table-wrap">
+              <table class="dre-table">
+                <thead>
+                  <tr>
+                    <th>Conta</th>
+                    <th class="col-num" id="cmp-th-penultimo">Penúltimo</th>
+                    <th class="col-num" id="cmp-th-ultimo">Último</th>
+                    <th class="col-num">Δ Absoluta</th>
+                    <th class="col-num">Δ %</th>
+                  </tr>
+                </thead>
+                <tbody id="cmp-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== COMPOSIÇÃO DE CAPITAL (FRE) ===== -->
+      <section class="view" id="view-composicao">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Composição de Capital</div>
+            <div class="page-subtitle">Grupo de capital do Formulário de Referência (FRE/CVM): capital social, aumentos/reduções, distribuição, posição acionária e direito de ação.</div>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="dre-search">
+            <div class="search-box">
+              <i class="ti ti-search"></i>
+              <input type="text" id="comp-busca" placeholder="Buscar companhia por razão social ou CNPJ..." autocomplete="off">
+            </div>
+            <div class="dre-autocomplete" id="comp-autocomplete"></div>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Modelo</label>
+            <select class="filter-select" id="comp-modelo">
+              <option value="capital_social">Capital Social</option>
+              <option value="capital_social_aumento">Aumento de Capital</option>
+              <option value="capital_social_reducao">Redução de Capital</option>
+              <option value="capital_social_desdobramento">Desdobramento</option>
+              <option value="capital_social_titulo_conversivel">Título Conversível</option>
+              <option value="distribuicao_capital">Distribuição de Capital</option>
+              <option value="posicao_acionaria">Posição Acionária</option>
+              <option value="direito_acao">Direito de Ação</option>
+            </select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
+            <select class="filter-select" id="comp-ano" disabled><option>—</option></select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Versão</label>
+            <select class="filter-select" id="comp-versao" disabled><option value="">Mais recente</option></select>
+          </div>
+          <button class="btn btn-primary" id="btn-comp-analisar" disabled><i class="ti ti-chart-bar"></i> Analisar</button>
+        </div>
+
+        <!-- Cabeçalho da companhia -->
+        <div class="dre-company" id="comp-company">
+          <div class="dre-company-top">
+            <div>
+              <div class="dre-company-name" id="comp-co-name">—</div>
+              <div class="dre-company-cnpj" id="comp-co-cnpj">—</div>
+            </div>
+            <span class="dre-template-pill" id="comp-co-template"><i class="ti ti-tag"></i> —</span>
+          </div>
+          <div class="dre-company-meta">
+            <div class="dre-cm-item"><span class="dre-cm-l">Código CVM</span><span class="dre-cm-v" id="comp-co-cvm">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Exercício</span><span class="dre-cm-v" id="comp-co-ano">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Modelo</span><span class="dre-cm-v" id="comp-co-modelo">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Registros</span><span class="dre-cm-v" id="comp-co-qtd">—</span></div>
+          </div>
+        </div>
+
+        <!-- KPIs de capital -->
+        <div class="kpi-grid app-hidden" id="comp-kpis">
+          <div class="kpi-card"><div class="kpi-label"><i class="ti ti-circle-letter-o"></i> Ações ordinárias (ON)</div><div class="kpi-value" id="comp-kpi-on">—</div><div class="kpi-sub" id="comp-kpi-on-sub">capital integralizado</div></div>
+          <div class="kpi-card"><div class="kpi-label"><i class="ti ti-circle-letter-p"></i> Ações preferenciais (PN)</div><div class="kpi-value" id="comp-kpi-pn">—</div><div class="kpi-sub" id="comp-kpi-pn-sub">capital integralizado</div></div>
+          <div class="kpi-card kpi-gold"><div class="kpi-label"><i class="ti ti-stack-2"></i> Total de ações</div><div class="kpi-value" id="comp-kpi-total">—</div><div class="kpi-sub" id="comp-kpi-cap-sub">capital social</div></div>
+          <div class="kpi-card kpi-success"><div class="kpi-label"><i class="ti ti-chart-donut"></i> Free float</div><div class="kpi-value" id="comp-kpi-ff">—</div><div class="kpi-sub" id="comp-kpi-ff-sub">ações em circulação</div></div>
+        </div>
+
+        <!-- Estado vazio / carregando -->
+        <div class="dre-empty" id="comp-empty">
+          <i class="ti ti-chart-pie dre-empty-icon"></i>
+          <div id="comp-empty-msg">Selecione uma companhia para visualizar a composição de capital.</div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="comp-content" class="app-hidden">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title" id="comp-table-title">Capital Social</div>
+              <div class="table-count" id="comp-table-count">—</div>
+            </div>
+            <div class="table-wrap">
+              <table class="dre-table" id="comp-table">
+                <thead><tr id="comp-thead"></tr></thead>
+                <tbody id="comp-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Master/detail: tabela filha *_classe_acao -->
+          <div class="table-card app-hidden" id="comp-detalhe-card" style="margin-top:18px;">
+            <div class="table-header">
+              <div class="table-title" id="comp-det-title">Detalhe por classe de ação</div>
+              <div class="table-count" id="comp-det-count">—</div>
+            </div>
+            <div class="table-wrap">
+              <table class="dre-table" id="comp-det-table">
+                <thead><tr id="comp-det-thead"></tr></thead>
+                <tbody id="comp-det-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== IMPORTAÇÃO DE MODELOS ===== -->
       <section class="view" id="view-importacao">
         <div class="page-header">
           <div>
             <div class="page-title">Importação de Modelos</div>
-            <div class="page-subtitle">Carregue os CSVs da CVM (open data DFP/ITR) para as demonstrações padronizadas.</div>
+            <div class="page-subtitle">Carregue os CSVs da CVM (open data DFP/ITR/FRE) para as demonstrações e formulários padronizados.</div>
           </div>
           <div class="page-actions">
             <div class="field-inline">
@@ -679,6 +884,7 @@
               <select class="filter-select" id="import-base">
                 <option value="DFP">DFP (anual)</option>
                 <option value="ITR">ITR (trimestral)</option>
+                <option value="FRE">FRE (Form. Referência)</option>
               </select>
             </div>
           </div>
@@ -1011,6 +1217,8 @@ function switchView(view) {
   if (view === 'importacao') { loadModelos(); carregarHistorico(); }
   if (view === 'dre') loadDre();
   if (view === 'itr') loadItr();
+  if (view === 'comparativo') loadComparativo();
+  if (view === 'composicao') loadComposicao();
 }
 
 /* ---------- crédito ---------- */
@@ -1341,6 +1549,249 @@ document.getElementById('ms-save').addEventListener('click', async () => {
   } catch { toast('Falha de conexão.', true); }
 });
 
+/* ---------- composição de capital (FRE) ---------- */
+const compState = { inited: false, empresa: null, anos: [], acItems: [], acActive: -1, acTimer: null };
+const COMP_HIDE = new Set(['CNPJ_Companhia', 'CNPJ_CIA', 'Nome_Companhia', 'DENOM_CIA', 'ID_Documento']);
+
+function compEsc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function compNumKind(k) { return k === 'Decimal' || k === 'Long' || k === 'Int' || k === 'Short'; }
+function compFmtVal(v, kind) {
+  if (v === null || v === undefined || v === '') return '—';
+  if (compNumKind(kind)) {
+    const n = Number(v);
+    return isFinite(n) ? n.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : String(v);
+  }
+  if (kind === 'Date') {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v));
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
+  }
+  return compEsc(v);
+}
+function compFmtQtd(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '—';
+}
+function compFmtPct(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  const n = Number(v);
+  return isFinite(n) ? n.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + '%' : '—';
+}
+
+function loadComposicao() {
+  if (compState.inited) return;
+  compState.inited = true;
+
+  const busca = document.getElementById('comp-busca');
+  busca.addEventListener('input', () => {
+    clearTimeout(compState.acTimer);
+    const termo = busca.value.trim();
+    compState.acTimer = setTimeout(() => compBuscarEmpresas(termo), 250);
+  });
+  busca.addEventListener('keydown', compAcNavegar);
+  busca.addEventListener('focus', () => { if (compState.acItems.length) document.getElementById('comp-autocomplete').classList.add('open'); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#view-composicao .dre-search')) compFecharAc(); });
+
+  document.getElementById('comp-ano').addEventListener('change', compPreencherVersoes);
+  document.getElementById('comp-modelo').addEventListener('change', () => { if (compState.empresa) compAnalisar(); });
+  document.getElementById('btn-comp-analisar').addEventListener('click', compAnalisar);
+}
+
+async function compBuscarEmpresas(termo) {
+  const box = document.getElementById('comp-autocomplete');
+  box.classList.add('open');
+  box.innerHTML = '<div class="dre-ac-empty"><i class="ti ti-loader-2 spin"></i> Buscando...</div>';
+  try {
+    const res = await authFetch(`api/fre/empresas?limite=30${termo ? '&busca=' + encodeURIComponent(termo) : ''}`);
+    if (!res.ok) { box.innerHTML = '<div class="dre-ac-empty">Não foi possível buscar companhias.</div>'; return; }
+    compState.acItems = await res.json();
+    compState.acActive = -1;
+    if (!compState.acItems.length) { box.innerHTML = '<div class="dre-ac-empty">Nenhuma companhia com FRE encontrada.</div>'; return; }
+    box.innerHTML = compState.acItems.map((e, i) => `
+      <div class="dre-ac-item" data-i="${i}">
+        <div class="dre-ac-name">${compEsc(e.denominacao || '—')}</div>
+        <div class="dre-ac-meta">${formatDoc(e.cnpjNum)} · CVM ${e.cdCvm || '—'} · ${e.qtdAnos} ano(s) · até ${e.ultimoAno || '—'}</div>
+      </div>`).join('');
+    box.querySelectorAll('.dre-ac-item').forEach(el =>
+      el.addEventListener('click', () => compSelecionarEmpresa(compState.acItems[+el.dataset.i])));
+  } catch {
+    box.innerHTML = '<div class="dre-ac-empty">Falha de conexão na busca.</div>';
+  }
+}
+
+function compAcNavegar(e) {
+  const box = document.getElementById('comp-autocomplete');
+  if (!compState.acItems.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); compState.acActive = Math.min(compState.acActive + 1, compState.acItems.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); compState.acActive = Math.max(compState.acActive - 1, 0); }
+  else if (e.key === 'Enter') { if (compState.acActive >= 0) { e.preventDefault(); compSelecionarEmpresa(compState.acItems[compState.acActive]); } return; }
+  else if (e.key === 'Escape') { compFecharAc(); return; }
+  else return;
+  box.querySelectorAll('.dre-ac-item').forEach((el, i) => el.classList.toggle('active', i === compState.acActive));
+}
+
+function compFecharAc() { document.getElementById('comp-autocomplete').classList.remove('open'); }
+
+async function compSelecionarEmpresa(emp) {
+  if (!emp) return;
+  compState.empresa = emp;
+  document.getElementById('comp-busca').value = emp.denominacao || '';
+  compFecharAc();
+  await compCarregarAnos();
+}
+
+async function compCarregarAnos() {
+  const selAno = document.getElementById('comp-ano');
+  const selVer = document.getElementById('comp-versao');
+  selAno.disabled = true; selVer.disabled = true;
+  selAno.innerHTML = '<option><i class="ti ti-loader-2"></i>...</option>';
+  try {
+    const res = await authFetch(`api/fre/${encodeURIComponent(compState.empresa.cnpjNum)}/anos`);
+    compState.anos = res.ok ? await res.json() : [];
+  } catch { compState.anos = []; }
+
+  if (!compState.anos.length) {
+    selAno.innerHTML = '<option>—</option>';
+    document.getElementById('btn-comp-analisar').disabled = true;
+    compMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Nenhum exercício FRE encontrado para esta companhia.</div>');
+    return;
+  }
+  selAno.innerHTML = compState.anos.map(a => `<option value="${a.ano}">${a.ano}</option>`).join('');
+  selAno.disabled = false;
+  compPreencherVersoes();
+  document.getElementById('btn-comp-analisar').disabled = false;
+}
+
+function compPreencherVersoes() {
+  const ano = +document.getElementById('comp-ano').value;
+  const selVer = document.getElementById('comp-versao');
+  const info = compState.anos.find(a => a.ano === ano);
+  const maxV = info && info.versaoMax ? info.versaoMax : 0;
+  let opts = '<option value="">Mais recente</option>';
+  for (let v = maxV; v >= 1; v--) opts += `<option value="${v}">Versão ${v}</option>`;
+  selVer.innerHTML = opts;
+  selVer.disabled = maxV <= 0;
+}
+
+async function compAnalisar() {
+  if (!compState.empresa) return;
+  const cnpj = compState.empresa.cnpjNum;
+  const modelo = document.getElementById('comp-modelo').value;
+  const ano = document.getElementById('comp-ano').value;
+  const versao = document.getElementById('comp-versao').value;
+
+  compMostrarVazio('<i class="ti ti-loader-2 spin dre-empty-icon"></i><div>Carregando dados...</div>');
+  document.getElementById('comp-kpis').classList.add('app-hidden');
+
+  const qs = new URLSearchParams();
+  if (ano) qs.set('ano', ano);
+  if (versao) qs.set('versao', versao);
+
+  try {
+    const res = await authFetch(`api/fre/${encodeURIComponent(cnpj)}/modelo/${encodeURIComponent(modelo)}?${qs.toString()}`);
+    if (!res.ok) {
+      const d = await parseJson(res);
+      compMostrarVazio(`<i class="ti ti-alert-triangle dre-empty-icon"></i><div>${(d && d.message) || 'Falha ao carregar o modelo.'}</div>`);
+      return;
+    }
+    const dados = await res.json();
+    compRenderCabecalho(dados, ano);
+    compRenderTabela(dados);
+    compRenderDetalhe(dados.detalhe);
+    document.getElementById('comp-empty').style.display = 'none';
+    document.getElementById('comp-content').classList.remove('app-hidden');
+    compCarregarKpis(cnpj, ano);
+  } catch {
+    compMostrarVazio('<i class="ti ti-plug-connected-x dre-empty-icon"></i><div>Sem conexão com o servidor.</div>');
+  }
+}
+
+function compRenderCabecalho(dados, ano) {
+  const emp = compState.empresa;
+  document.getElementById('comp-co-name').textContent = emp.denominacao || '—';
+  document.getElementById('comp-co-cnpj').textContent = formatDoc(emp.cnpjNum);
+  document.getElementById('comp-co-cvm').textContent = emp.cdCvm || '—';
+  document.getElementById('comp-co-ano').textContent = ano || '—';
+  document.getElementById('comp-co-modelo').textContent = dados.descricao || prettyModelo(dados.modelo);
+  document.getElementById('comp-co-qtd').textContent = (dados.linhas || []).length;
+  document.getElementById('comp-co-template').innerHTML = `<i class="ti ${modeloIcon(dados.modelo)}"></i> ${prettyModelo(dados.modelo)}`;
+  document.getElementById('comp-company').classList.add('show');
+}
+
+function compRenderTabela(dados) {
+  const cols = (dados.colunas || []).filter(c => !COMP_HIDE.has(c.nome));
+  const thead = document.getElementById('comp-thead');
+  const body = document.getElementById('comp-body');
+  document.getElementById('comp-table-title').textContent = dados.descricao || prettyModelo(dados.modelo);
+  document.getElementById('comp-table-count').textContent = `${(dados.linhas || []).length} registro(s)`;
+
+  thead.innerHTML = cols.map(c =>
+    `<th${compNumKind(c.kind) ? ' class="col-num"' : ''}>${compEsc(prettyModelo(c.nome))}</th>`).join('');
+
+  if (!(dados.linhas || []).length) {
+    body.innerHTML = `<tr><td colspan="${cols.length || 1}" style="text-align:center;color:var(--text-muted);padding:18px;">Sem dados para o filtro selecionado.</td></tr>`;
+    return;
+  }
+  body.innerHTML = dados.linhas.map(row =>
+    '<tr>' + cols.map(c =>
+      `<td${compNumKind(c.kind) ? ' style="text-align:right;font-family:\'DM Mono\',monospace;"' : ''}>${compFmtVal(row[c.nome], c.kind)}</td>`).join('') + '</tr>'
+  ).join('');
+}
+
+function compRenderDetalhe(det) {
+  const card = document.getElementById('comp-detalhe-card');
+  if (!det) { card.classList.add('app-hidden'); return; }
+  card.classList.remove('app-hidden');
+
+  const cols = (det.colunas || []).filter(c => !COMP_HIDE.has(c.nome));
+  document.getElementById('comp-det-title').textContent = det.descricao || 'Detalhe por classe de ação';
+  document.getElementById('comp-det-count').textContent =
+    `${(det.linhas || []).length} registro(s)${det.joinKey ? ' · agrupado por ' + prettyModelo(det.joinKey) : ''}`;
+
+  document.getElementById('comp-det-thead').innerHTML = cols.map(c =>
+    `<th${compNumKind(c.kind) ? ' class="col-num"' : ''}>${compEsc(prettyModelo(c.nome))}</th>`).join('');
+
+  const body = document.getElementById('comp-det-body');
+  if (!(det.linhas || []).length) {
+    body.innerHTML = `<tr><td colspan="${cols.length || 1}" style="text-align:center;color:var(--text-muted);padding:18px;">Sem detalhe por classe de ação.</td></tr>`;
+    return;
+  }
+  body.innerHTML = det.linhas.map(row =>
+    '<tr>' + cols.map(c =>
+      `<td${compNumKind(c.kind) ? ' style="text-align:right;font-family:\'DM Mono\',monospace;"' : ''}>${compFmtVal(row[c.nome], c.kind)}</td>`).join('') + '</tr>'
+  ).join('');
+}
+
+async function compCarregarKpis(cnpj, ano) {
+  const grid = document.getElementById('comp-kpis');
+  try {
+    const res = await authFetch(`api/fre/${encodeURIComponent(cnpj)}/capital-resumo${ano ? '?ano=' + ano : ''}`);
+    if (!res.ok) { grid.classList.add('app-hidden'); return; }
+    const linhas = await res.json();
+    const r = (linhas || []).find(x => !ano || String(x.ano) === String(ano)) || (linhas || [])[0];
+    if (!r) { grid.classList.add('app-hidden'); return; }
+    document.getElementById('comp-kpi-on').textContent = compFmtQtd(r.acoesOrdinarias);
+    document.getElementById('comp-kpi-pn').textContent = compFmtQtd(r.acoesPreferenciais);
+    document.getElementById('comp-kpi-total').textContent = compFmtQtd(r.acoesTotal);
+    document.getElementById('comp-kpi-cap-sub').textContent = r.valorCapital != null
+      ? 'Capital: ' + Number(r.valorCapital).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+      : 'capital social';
+    document.getElementById('comp-kpi-ff').textContent = compFmtPct(r.percentualFreeFloat);
+    document.getElementById('comp-kpi-ff-sub').textContent = r.acoesCirculacao != null
+      ? compFmtQtd(r.acoesCirculacao) + ' ações em circulação'
+      : 'ações em circulação';
+    grid.classList.remove('app-hidden');
+  } catch { grid.classList.add('app-hidden'); }
+}
+
+function compMostrarVazio(html) {
+  document.getElementById('comp-content').classList.add('app-hidden');
+  document.getElementById('comp-kpis').classList.add('app-hidden');
+  const empty = document.getElementById('comp-empty');
+  empty.style.display = 'block';
+  empty.innerHTML = html;
+}
+
 /* ---------- importação de modelos ---------- */
 const MODELO_META = {
   DOCUMENTO:           { icon: 'ti-file-stack',       rotulo: 'Documentos' },
@@ -1354,9 +1805,40 @@ const MODELO_META = {
   DMPL:                { icon: 'ti-arrows-exchange',   rotulo: 'Mutações do PL' },
   COMPOSICAO_CAPITAL:  { icon: 'ti-chart-pie',         rotulo: 'Composição Capital' },
   PARECER:             { icon: 'ti-file-certificate',  rotulo: 'Parecer / Auditor' },
+  // FRE (Formulário de Referência) — chaves em snake_case (mesmo nome do arquivo).
+  capital_social:                       { icon: 'ti-pig-money',        rotulo: 'Capital Social' },
+  capital_social_classe_acao:           { icon: 'ti-stack-2',          rotulo: 'Cap. Social · Classe' },
+  capital_social_aumento:               { icon: 'ti-trending-up',      rotulo: 'Aumento de Capital' },
+  capital_social_aumento_classe_acao:   { icon: 'ti-stack-2',          rotulo: 'Aumento · Classe' },
+  capital_social_reducao:               { icon: 'ti-trending-down',    rotulo: 'Redução de Capital' },
+  capital_social_reducao_classe_acao:   { icon: 'ti-stack-2',          rotulo: 'Redução · Classe' },
+  capital_social_desdobramento:         { icon: 'ti-arrows-split',     rotulo: 'Desdobramento' },
+  capital_social_desdobramento_classe_acao: { icon: 'ti-stack-2',      rotulo: 'Desdobr. · Classe' },
+  capital_social_titulo_conversivel:    { icon: 'ti-certificate',      rotulo: 'Título Conversível' },
+  distribuicao_capital:                 { icon: 'ti-chart-donut',      rotulo: 'Distribuição Capital' },
+  distribuicao_capital_classe_acao:     { icon: 'ti-stack-2',          rotulo: 'Distribuição · Classe' },
+  posicao_acionaria:                    { icon: 'ti-users-group',      rotulo: 'Posição Acionária' },
+  posicao_acionaria_classe_acao:        { icon: 'ti-stack-2',          rotulo: 'Posição · Classe' },
+  direito_acao:                         { icon: 'ti-gavel',            rotulo: 'Direito de Ação' },
+  remuneracao_total_orgao:              { icon: 'ti-cash',             rotulo: 'Remuneração Órgão' },
+  remuneracao_variavel:                 { icon: 'ti-coins',            rotulo: 'Remuneração Variável' },
+  remuneracao_acao:                     { icon: 'ti-chart-candle',     rotulo: 'Remuneração em Ações' },
+  remuneracao_maxima_minima_media:      { icon: 'ti-arrows-vertical',  rotulo: 'Remuneração Máx/Mín' },
+  auditor:                              { icon: 'ti-shield-check',     rotulo: 'Auditor' },
+  posicao_acionaria_consolidada:        { icon: 'ti-users-group',      rotulo: 'Posição Consolidada' },
+  historico_emissor:                    { icon: 'ti-history',          rotulo: 'Histórico do Emissor' },
 };
 
-let modelosCache = null;
+// Rótulo amigável para chaves FRE sem entrada em MODELO_META (prettifica o snake_case).
+function prettyModelo(tipo) {
+  const meta = MODELO_META[tipo];
+  if (meta) return meta.rotulo;
+  return String(tipo || '').split('_').filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+function modeloIcon(tipo) { return (MODELO_META[tipo] && MODELO_META[tipo].icon) || 'ti-table'; }
+
+let modelosCache = {};
 let modeloSelecionado = null;
 let arquivoSelecionado = null;
 let importPollTimer = null;
@@ -1364,13 +1846,32 @@ let importJobId = null;
 let importBase = 'DFP';        // base selecionada na tela de importacao (DFP/ITR)
 let importJobApiBase = 'api/dfp'; // prefixo da API do job em andamento (capturado no inicio)
 
-function importApiBase() { return importBase === 'ITR' ? 'api/itr' : 'api/dfp'; }
+function importApiBase() {
+  if (importBase === 'ITR') return 'api/itr';
+  if (importBase === 'FRE') return 'api/fre';
+  return 'api/dfp';
+}
+
+// Chave do cache de tipos: DFP e ITR compartilham o catalogo DFP; FRE tem o seu.
+function modelosCacheKey() { return importBase === 'FRE' ? 'FRE' : 'DFP'; }
+
+function atualizarDicaImport() {
+  const hint = document.querySelector('#import-dropzone .dz-hint');
+  if (!hint) return;
+  hint.textContent = importBase === 'FRE'
+    ? 'CSV da CVM no formato fre_cia_aberta_<modelo>_AAAA.csv (separador “;”, ISO-8859-1)'
+    : 'Apenas arquivos .csv da CVM (separador “;”, codificação ISO-8859-1)';
+}
 
 document.getElementById('import-base').addEventListener('change', (e) => {
-  importBase = e.target.value === 'ITR' ? 'ITR' : 'DFP';
-  // ITR so trata DRE; se o modelo selecionado nao for valido para a base, limpa.
-  if (importBase === 'ITR' && modeloSelecionado && modeloSelecionado !== 'DRE') resetImportForm();
-  renderModelos();
+  const novo = e.target.value === 'ITR' ? 'ITR' : (e.target.value === 'FRE' ? 'FRE' : 'DFP');
+  const trocouCategoria = (importBase === 'FRE') !== (novo === 'FRE');
+  importBase = novo;
+  // ITR so trata DRE; ao trocar entre FRE e DFP/ITR o catalogo muda, entao limpamos a selecao.
+  if (trocouCategoria || (importBase === 'ITR' && modeloSelecionado && modeloSelecionado !== 'DRE'))
+    resetImportForm();
+  atualizarDicaImport();
+  loadModelos();
   carregarHistorico();
 });
 
@@ -1385,16 +1886,19 @@ function fmtBytes(b) {
 
 async function loadModelos() {
   const grid = document.getElementById('model-grid');
-  if (modelosCache) { renderModelos(); return; }
+  const key = modelosCacheKey();
+  if (modelosCache[key]) { renderModelos(); return; }
   grid.innerHTML = '<div class="model-empty"><i class="ti ti-loader-2 spin"></i> Carregando modelos...</div>';
   try {
-    const res = await authFetch('api/dfp/tipos');
+    // DFP/ITR usam o catalogo DFP; FRE tem o seu proprio endpoint de tipos.
+    const tiposUrl = key === 'FRE' ? 'api/fre/tipos' : 'api/dfp/tipos';
+    const res = await authFetch(tiposUrl);
     if (!res.ok) {
       const d = await parseJson(res);
       grid.innerHTML = `<div class="model-empty"><i class="ti ti-alert-triangle"></i> ${d.message || 'Falha ao carregar modelos.'}</div>`;
       return;
     }
-    modelosCache = await res.json();
+    modelosCache[key] = await res.json();
     renderModelos();
   } catch {
     grid.innerHTML = '<div class="model-empty"><i class="ti ti-plug-connected-x"></i> Sem conexão com o servidor.</div>';
@@ -1403,23 +1907,23 @@ async function loadModelos() {
 
 function renderModelos() {
   const grid = document.getElementById('model-grid');
-  if (!modelosCache || !modelosCache.length) {
+  const cache = modelosCache[modelosCacheKey()];
+  if (!cache || !cache.length) {
     grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível.</div>';
     return;
   }
-  // ITR (trimestral) so importa DRE; DFP (anual) mostra todas as demonstracoes.
-  const lista = importBase === 'ITR' ? modelosCache.filter(m => m.tipo === 'DRE') : modelosCache;
+  // ITR (trimestral) so importa DRE; DFP (anual) e FRE mostram todos os seus modelos.
+  const lista = importBase === 'ITR' ? cache.filter(m => m.tipo === 'DRE') : cache;
   if (!lista.length) {
     grid.innerHTML = '<div class="model-empty"><i class="ti ti-mood-empty"></i> Nenhum modelo disponível para esta base.</div>';
     return;
   }
   grid.innerHTML = lista.map(m => {
-    const meta = MODELO_META[m.tipo] || { icon: 'ti-table', rotulo: m.tipo };
     const sel = modeloSelecionado === m.tipo ? ' selected' : '';
     return `<div class="model-card${sel}" data-tipo="${m.tipo}" title="${m.descricao || ''}">
         <div class="mc-check"><i class="ti ti-check"></i></div>
-        <div class="mc-icon"><i class="ti ${meta.icon}"></i></div>
-        <div class="mc-name">${meta.rotulo}</div>
+        <div class="mc-icon"><i class="ti ${modeloIcon(m.tipo)}"></i></div>
+        <div class="mc-name">${prettyModelo(m.tipo)}</div>
         <div class="mc-desc">${m.descricao || m.tipo}</div>
       </div>`;
   }).join('');
@@ -1490,8 +1994,7 @@ async function iniciarImportacao() {
 function abrirPainelProgresso() {
   const panel = document.getElementById('import-progress');
   panel.className = 'import-progress show';
-  const meta = MODELO_META[modeloSelecionado] || { rotulo: modeloSelecionado };
-  document.getElementById('ip-model').textContent = `${meta.rotulo} · ${arquivoSelecionado ? arquivoSelecionado.name : ''}`;
+  document.getElementById('ip-model').textContent = `${prettyModelo(modeloSelecionado)} · ${arquivoSelecionado ? arquivoSelecionado.name : ''}`;
   document.getElementById('ip-status-text').textContent = 'Iniciando...';
   document.getElementById('ip-message').textContent = '';
   document.getElementById('ip-tabela').textContent = '—';
@@ -1624,11 +2127,10 @@ async function carregarHistorico() {
       return;
     }
     body.innerHTML = rows.map(r => {
-      const meta = MODELO_META[r.tipo] || { rotulo: r.tipo };
       const icon = HIST_STATUS_ICON[r.status] || 'ti-point';
       return `<tr>
         <td>${fmtDataHora(r.iniciadoEmUtc)}</td>
-        <td>${meta.rotulo}</td>
+        <td>${prettyModelo(r.tipo)}</td>
         <td>${histConjuntoLabel(r.conjunto)}</td>
         <td class="num">${r.ano || '—'}</td>
         <td title="${(r.arquivo || '').replace(/"/g, '&quot;')}">${r.arquivo || '—'}</td>
@@ -2450,6 +2952,255 @@ function itrExportCsv() {
   const nome = (itrState.empresa.denominacao || itrState.empresa.cnpjNum).replace(/[^\w]+/g, '-').slice(0, 40);
   const conj = document.getElementById('itr-conjunto').value;
   a.download = `itr-${nome}-${p.label.replace(/\s+/g, '')}-${conj}-${m.modo}.csv`;
+  a.click();
+}
+
+/* ============================================================
+   COMPARATIVO DE DRE (PENÚLTIMO × ÚLTIMO)
+   Consome api/{base}/{cnpj}/dre/comparativo?conjunto=&ano=&modo=.
+   Os valores ja chegam em R$ (o backend resolve a escala); o frontend so formata.
+   ============================================================ */
+const cmpState = {
+  inited: false,
+  empresa: null,   // { cnpjNum, denominacao, cdCvm, ultimoAno, qtdAnos }
+  itens: [],       // itens do comparativo retornados pelo backend
+};
+let cmpBuscaTimer = null;
+let cmpAcItems = [];
+let cmpAcActive = -1;
+
+function loadComparativo() {
+  if (cmpState.inited) return;
+  cmpState.inited = true;
+  cmpBindEvents();
+}
+
+function cmpBindEvents() {
+  const busca = document.getElementById('cmp-busca');
+  busca.addEventListener('input', () => {
+    clearTimeout(cmpBuscaTimer);
+    const q = busca.value.trim();
+    if (q.length < 2) { cmpFecharAutocomplete(); return; }
+    cmpBuscaTimer = setTimeout(() => cmpBuscarEmpresas(q), 280);
+  });
+  busca.addEventListener('keydown', cmpAcKeydown);
+  busca.addEventListener('focus', () => { if (cmpAcItems.length) document.getElementById('cmp-autocomplete').classList.add('open'); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#view-comparativo .dre-search')) cmpFecharAutocomplete(); });
+  document.getElementById('cmp-base').addEventListener('change', () => { cmpState.empresa = null; document.getElementById('cmp-busca').value = ''; cmpMostrarVazio('<i class="ti ti-arrows-diff dre-empty-icon"></i><div>Selecione uma companhia para comparar dois períodos da DRE.</div>'); document.getElementById('btn-cmp-analisar').disabled = true; });
+  document.getElementById('cmp-conjunto').addEventListener('change', cmpAnalisar);
+  document.getElementById('cmp-ano').addEventListener('change', cmpAnalisar);
+  document.getElementById('cmp-modo').addEventListener('change', cmpAnalisar);
+  document.getElementById('btn-cmp-analisar').addEventListener('click', cmpAnalisar);
+  document.getElementById('btn-cmp-export').addEventListener('click', cmpExportCsv);
+}
+
+function cmpBaseAtual() { return document.getElementById('cmp-base').value === 'DFP' ? 'DFP' : 'ITR'; }
+function cmpApiBase() { return cmpBaseAtual() === 'DFP' ? 'api/dfp' : 'api/itr'; }
+
+/* ---------- autocomplete de companhia ---------- */
+async function cmpBuscarEmpresas(q) {
+  const box = document.getElementById('cmp-autocomplete');
+  box.classList.add('open');
+  box.innerHTML = '<div class="dre-ac-empty"><i class="ti ti-loader-2 spin"></i> Buscando...</div>';
+  try {
+    const res = await authFetch(cmpApiBase() + '/empresas?limite=20&busca=' + encodeURIComponent(q));
+    if (!res.ok) { box.innerHTML = '<div class="dre-ac-empty">Não foi possível buscar companhias.</div>'; return; }
+    const list = await res.json();
+    cmpAcItems = Array.isArray(list) ? list : [];
+    cmpAcActive = -1;
+    if (!cmpAcItems.length) { box.innerHTML = '<div class="dre-ac-empty">Nenhuma companhia encontrada nesta base.</div>'; return; }
+    box.innerHTML = cmpAcItems.map((e, i) => `
+      <div class="dre-ac-item" data-i="${i}">
+        <div class="dre-ac-name">${(e.denominacao || '—')}</div>
+        <div class="dre-ac-meta">${formatDoc(e.cnpjNum)} · CVM ${e.cdCvm || '—'} · até ${e.ultimoAno || '—'}</div>
+      </div>`).join('');
+    box.querySelectorAll('.dre-ac-item').forEach(el =>
+      el.addEventListener('click', () => cmpSelecionarEmpresa(cmpAcItems[parseInt(el.dataset.i, 10)])));
+  } catch {
+    box.innerHTML = '<div class="dre-ac-empty">Falha de conexão na busca.</div>';
+  }
+}
+function cmpAcKeydown(e) {
+  const box = document.getElementById('cmp-autocomplete');
+  if (!box.classList.contains('open') || !cmpAcItems.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    cmpAcActive += e.key === 'ArrowDown' ? 1 : -1;
+    if (cmpAcActive < 0) cmpAcActive = cmpAcItems.length - 1;
+    if (cmpAcActive >= cmpAcItems.length) cmpAcActive = 0;
+    box.querySelectorAll('.dre-ac-item').forEach((el, i) => el.classList.toggle('active', i === cmpAcActive));
+  } else if (e.key === 'Enter') {
+    if (cmpAcActive >= 0) { e.preventDefault(); cmpSelecionarEmpresa(cmpAcItems[cmpAcActive]); }
+  } else if (e.key === 'Escape') {
+    cmpFecharAutocomplete();
+  }
+}
+function cmpFecharAutocomplete() { document.getElementById('cmp-autocomplete').classList.remove('open'); }
+
+function cmpSelecionarEmpresa(emp) {
+  if (!emp) return;
+  cmpState.empresa = emp;
+  document.getElementById('cmp-busca').value = emp.denominacao || emp.cnpjNum;
+  cmpFecharAutocomplete();
+  document.getElementById('btn-cmp-analisar').disabled = false;
+  cmpPrepararAnos(emp);
+  cmpAnalisar();
+}
+
+function cmpPrepararAnos(emp) {
+  const selAno = document.getElementById('cmp-ano');
+  const ate = emp.ultimoAno || new Date().getFullYear();
+  const qtd = Math.max(1, emp.qtdAnos || 1);
+  const anos = [];
+  for (let a = ate; a > ate - qtd; a--) anos.push(a);
+  selAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  selAno.disabled = false;
+  document.getElementById('cmp-conjunto').disabled = false;
+}
+
+/* ---------- análise ---------- */
+async function cmpAnalisar() {
+  if (!cmpState.empresa) return;
+  const cnpj = cmpState.empresa.cnpjNum;
+  const base = cmpBaseAtual();
+  const conjunto = document.getElementById('cmp-conjunto').value;
+  const modo = document.getElementById('cmp-modo').value;
+  const anoVal = document.getElementById('cmp-ano').value;
+  const ano = anoVal && /^\d+$/.test(anoVal) ? anoVal : '';
+  const btn = document.getElementById('btn-cmp-analisar');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Comparando...';
+  cmpMostrarVazio('<i class="ti ti-loader-2 spin dre-empty-icon"></i><div>Carregando comparativo...</div>', true);
+  try {
+    const qs = new URLSearchParams({ conjunto, modo });
+    if (ano) qs.set('ano', ano);
+    const res = await authFetch(cmpApiBase() + '/' + encodeURIComponent(cnpj) + '/dre/comparativo?' + qs.toString());
+    if (!res.ok) {
+      const d = await parseJson(res);
+      cmpMostrarVazio('<i class="ti ti-alert-triangle dre-empty-icon"></i><div>' + (d.message || 'Falha ao carregar o comparativo.') + '</div>');
+      return;
+    }
+    const itens = await res.json();
+    cmpState.itens = (Array.isArray(itens) ? itens : []).filter(i => i.cdConta);
+    if (!cmpState.itens.length) {
+      cmpMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados comparáveis para os filtros selecionados. Para o modo homólogo é preciso ter o período corrente e o ano anterior importados.</div>', true);
+      return;
+    }
+    cmpRender();
+  } catch {
+    cmpMostrarVazio('<i class="ti ti-plug-connected-x dre-empty-icon"></i><div>Sem conexão com o servidor.</div>');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-chart-bar"></i> Comparar';
+  }
+}
+
+function cmpMostrarVazio(html, manterCompany = false) {
+  document.getElementById('cmp-content').classList.add('app-hidden');
+  if (!manterCompany) document.getElementById('cmp-company').classList.remove('show');
+  const empty = document.getElementById('cmp-empty');
+  empty.style.display = 'block';
+  empty.innerHTML = html;
+  document.getElementById('btn-cmp-export').disabled = true;
+}
+
+/* ---------- render ---------- */
+function cmpRender() {
+  const itens = cmpState.itens.slice().sort((a, b) => dreCmpCd(a.cdConta, b.cdConta));
+  const base = cmpBaseAtual();
+  const conjunto = document.getElementById('cmp-conjunto').value;
+  const modo = document.getElementById('cmp-modo').value;
+  const ref = itens[0];
+
+  // Cabeçalho da companhia.
+  const card = document.getElementById('cmp-company');
+  card.classList.add('show');
+  document.getElementById('cmp-co-name').textContent = cmpState.empresa.denominacao || cmpState.empresa.cnpjNum || '—';
+  document.getElementById('cmp-co-cnpj').textContent = formatDoc(cmpState.empresa.cnpjNum);
+  document.getElementById('cmp-co-base').textContent = base === 'DFP' ? 'DFP (anual)' : 'ITR (trimestral)';
+  document.getElementById('cmp-co-conjunto').textContent = conjunto === 'CON' ? 'Consolidado' : 'Individual';
+  document.getElementById('cmp-co-ultimo').textContent = ref.periodoUltimo || '—';
+  document.getElementById('cmp-co-penultimo').textContent = ref.periodoPenultimo || '—';
+  document.getElementById('cmp-co-modo').innerHTML = modo === 'sequencial'
+    ? '<i class="ti ti-arrows-diff"></i> Sequencial (QoQ)'
+    : '<i class="ti ti-arrows-diff"></i> Homólogo (YoY)';
+
+  // Aviso de sazonalidade no modo sequencial.
+  const aviso = document.getElementById('cmp-aviso');
+  if (modo === 'sequencial') {
+    aviso.style.display = '';
+    document.getElementById('cmp-aviso-msg').innerHTML =
+      '<i class="ti ti-alert-triangle"></i> Comparativo sequencial (QoQ): sensível a sazonalidade. Para análise contábil, prefira o modo homólogo (YoY).';
+  } else {
+    aviso.style.display = 'none';
+  }
+
+  document.getElementById('cmp-th-penultimo').textContent = 'Penúltimo · ' + (ref.periodoPenultimo || '—');
+  document.getElementById('cmp-th-ultimo').textContent = 'Último · ' + (ref.periodoUltimo || '—');
+
+  const reaprQtd = itens.filter(i => i.reapresentado).length;
+  document.getElementById('cmp-table-count').innerHTML =
+    `${itens.length} conta(s) · ${conjunto === 'CON' ? 'Consolidado' : 'Individual'}`
+    + (reaprQtd ? ` · <span class="badge b-warn"><i class="ti ti-alert-triangle"></i> ${reaprQtd} reapresentada(s)</span>` : '');
+
+  document.getElementById('cmp-empty').style.display = 'none';
+  document.getElementById('cmp-content').classList.remove('app-hidden');
+  document.getElementById('btn-cmp-export').disabled = false;
+
+  const body = document.getElementById('cmp-body');
+  body.innerHTML = itens.map(i => {
+    const nivel = dreNivel(i.cdConta);
+    const indent = Math.max(0, (nivel - 2)) * 16;
+    const flags = [];
+    if (i.reapresentado) flags.push('<span class="badge b-warn" title="Comparativo reapresentado pela CVM"><i class="ti ti-refresh-alert"></i> Reapres.</span>');
+    if (i.baixaComparabilidade) flags.push('<span class="badge b-warn" title="Conta livre (ST_CONTA_FIXA = N): baixa comparabilidade entre períodos"><i class="ti ti-alert-triangle"></i> Conta livre</span>');
+    if (i.inversaoDeSinal) flags.push('<span class="badge b-ind" title="Inversão de sinal entre os períodos (ex.: lucro → prejuízo)"><i class="ti ti-arrows-up-down"></i> Inversão</span>');
+    const flagsHtml = flags.length ? `<span class="cmp-flags">${flags.join('')}</span>` : '';
+
+    // Δ %: oculta quando inversão de sinal ou sem base comparável (base zero/nula).
+    let pctHtml = '—';
+    if (!i.inversaoDeSinal && i.variacaoPercentual != null) {
+      const pct = i.variacaoPercentual * 100;
+      pctHtml = `<span class="${pct >= 0 ? 'cmp-pos' : 'cmp-neg'}">${dreFmtPct(pct)}</span>`;
+    }
+    let absHtml = '—';
+    if (i.variacaoAbsoluta != null) {
+      const cls = i.variacaoAbsoluta >= 0 ? 'cmp-pos' : 'cmp-neg';
+      absHtml = `<span class="${cls}">${dreFmtMoney(i.variacaoAbsoluta)}</span>`;
+    }
+
+    return `<tr class="dre-row dre-lvl-${nivel}">
+      <td class="dre-desc" style="padding-left:${14 + indent}px;" title="${(i.dsConta || '').replace(/"/g, '&quot;')}">${i.dsConta || i.cdConta}${flagsHtml}</td>
+      <td class="col-num">${dreFmtMoney(i.valorPenultimo)}</td>
+      <td class="col-num">${dreFmtMoney(i.valorUltimo)}</td>
+      <td class="col-num">${absHtml}</td>
+      <td class="col-num">${pctHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------- export CSV ---------- */
+function cmpExportCsv() {
+  const itens = cmpState.itens;
+  if (!itens || !itens.length) { toast('Nada para exportar.', true); return; }
+  const ref = itens[0];
+  const head = ['CD_CONTA', 'Descricao', 'Penultimo (' + (ref.periodoPenultimo || '') + ')', 'Ultimo (' + (ref.periodoUltimo || '') + ')', 'Delta Absoluto', 'Delta %', 'Reapresentado', 'InversaoDeSinal', 'BaixaComparabilidade'];
+  const linhas = itens.slice().sort((a, b) => dreCmpCd(a.cdConta, b.cdConta)).map(i => [
+    i.cdConta, i.dsConta || '',
+    (i.valorPenultimo ?? '').toString().replace('.', ','),
+    (i.valorUltimo ?? '').toString().replace('.', ','),
+    (i.variacaoAbsoluta ?? '').toString().replace('.', ','),
+    (i.variacaoPercentual == null ? '' : (i.variacaoPercentual * 100).toFixed(1).replace('.', ',')),
+    i.reapresentado ? 'Sim' : 'Nao',
+    i.inversaoDeSinal ? 'Sim' : 'Nao',
+    i.baixaComparabilidade ? 'Sim' : 'Nao',
+  ]);
+  const csv = [head.join(';')].concat(
+    linhas.map(r => r.map(c => `"${(c ?? '').toString().replace(/"/g, '""')}"`).join(';'))
+  ).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = (cmpState.empresa.denominacao || cmpState.empresa.cnpjNum).replace(/[^\w]+/g, '-').slice(0, 40);
+  a.download = `comparativo-${cmpBaseAtual()}-${nome}.csv`;
   a.click();
 }
 
