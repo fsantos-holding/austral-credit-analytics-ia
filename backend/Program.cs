@@ -67,6 +67,7 @@ builder.Services.AddScoped<IDreComparativoService, DreComparativoService>();
 builder.Services.AddScoped<IFreImportService, FreImportService>();
 builder.Services.AddScoped<IFreRepository, FreRepository>();
 builder.Services.AddScoped<IFreDossieRepository, FreDossieRepository>();
+builder.Services.AddScoped<IAcionistaCruzamentoRepository, AcionistaCruzamentoRepository>();
 
 // Autenticacao/permissionamento: usuarios, perfis e log de atividades no proprio banco.
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();

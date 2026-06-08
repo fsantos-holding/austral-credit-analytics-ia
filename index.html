@@ -476,8 +476,10 @@
         <div class="nav-item" data-view="dre"><i class="ti ti-report-money"></i><span>Leitura de DRE</span></div>
         <div class="nav-item" data-view="itr"><i class="ti ti-calendar-stats"></i><span>Leitura de ITR (Trimestral)</span></div>
         <div class="nav-item" data-view="bpa"><i class="ti ti-scale"></i><span>Leitura de Balanço (Ativo)</span></div>
+        <div class="nav-item" data-view="bpp"><i class="ti ti-scale-outline"></i><span>Leitura de Balanço (Passivo)</span></div>
         <div class="nav-item" data-view="comparativo"><i class="ti ti-arrows-diff"></i><span>Comparativo de DRE</span></div>
         <div class="nav-item" data-view="composicao"><i class="ti ti-chart-pie"></i><span>Composição Capital</span></div>
+        <div class="nav-item" data-view="acionistas"><i class="ti ti-affiliate"></i><span>Acionistas Cruzados</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Dados</div>
@@ -709,6 +711,89 @@
                   </tr>
                 </thead>
                 <tbody id="bpa-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== LEITURA DE BALANÇO PATRIMONIAL PASSIVO (BPP) ===== -->
+      <section class="view" id="view-bpp">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Leitura de Balanço (Passivo)</div>
+            <div class="page-subtitle">Balanço Patrimonial Passivo estruturado por código de conta, com análise vertical sobre o Passivo Total.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="btn-bpp-export" disabled><i class="ti ti-download"></i> Exportar CSV</button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="dre-search">
+            <div class="search-box">
+              <i class="ti ti-search"></i>
+              <input type="text" id="bpp-busca" placeholder="Buscar companhia por razão social ou CNPJ..." autocomplete="off">
+            </div>
+            <div class="dre-autocomplete" id="bpp-autocomplete"></div>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
+            <select class="filter-select" id="bpp-ano" disabled><option>—</option></select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Data-base</label>
+            <select class="filter-select" id="bpp-periodo" disabled><option>—</option></select>
+          </div>
+          <select class="filter-select" id="bpp-conjunto" disabled>
+            <option value="CON">Consolidado</option>
+            <option value="IND">Individual</option>
+          </select>
+          <button class="btn btn-primary" id="btn-bpp-analisar" disabled><i class="ti ti-chart-bar"></i> Analisar</button>
+        </div>
+
+        <!-- Cabeçalho da companhia -->
+        <div class="dre-company" id="bpp-company">
+          <div class="dre-company-top">
+            <div>
+              <div class="dre-company-name" id="bpp-co-name">—</div>
+              <div class="dre-company-cnpj" id="bpp-co-cnpj">—</div>
+            </div>
+            <span class="dre-template-pill" id="bpp-co-template"><i class="ti ti-scale-outline"></i> Balanço Passivo</span>
+          </div>
+          <div class="dre-company-meta">
+            <div class="dre-cm-item"><span class="dre-cm-l">Código CVM</span><span class="dre-cm-v" id="bpp-co-cvm">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Data-base</span><span class="dre-cm-v" id="bpp-co-ano">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Conjunto</span><span class="dre-cm-v" id="bpp-co-conjunto">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Moeda</span><span class="dre-cm-v" id="bpp-co-moeda">—</span></div>
+            <div class="dre-cm-item"><span class="dre-cm-l">Versão</span><span class="dre-cm-v" id="bpp-co-versao">—</span></div>
+          </div>
+        </div>
+
+        <!-- Estado vazio / carregando -->
+        <div class="dre-empty" id="bpp-empty">
+          <i class="ti ti-scale-outline dre-empty-icon"></i>
+          <div id="bpp-empty-msg">Selecione uma companhia para visualizar o Balanço Patrimonial Passivo.</div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="bpp-content" class="app-hidden">
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Balanço Patrimonial Passivo</div>
+              <div class="table-count" id="bpp-table-count">—</div>
+            </div>
+            <div class="table-wrap">
+              <table class="dre-table">
+                <thead>
+                  <tr>
+                    <th style="width:18px;"></th>
+                    <th>Conta</th>
+                    <th class="col-num" id="bpp-th-atual">Valor</th>
+                    <th class="col-num">AV%</th>
+                  </tr>
+                </thead>
+                <tbody id="bpp-body"></tbody>
               </table>
             </div>
           </div>
@@ -957,6 +1042,62 @@
 
         <!-- Corpo da aba (KPIs + gráficos + blocos + tabelas) -->
         <div id="comp-tab-body" class="app-hidden"></div>
+      </section>
+
+      <!-- ===== ACIONISTAS CRUZADOS ===== -->
+      <section class="view" id="view-acionistas">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Acionistas Cruzados</div>
+            <div class="page-subtitle">Cruzamento das posições acionárias (FRE/CVM) entre todas as companhias importadas: acionistas presentes em mais de uma empresa, conexões e ranking. Usa o último exercício/versão de cada companhia.</div>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="dre-search">
+            <div class="search-box">
+              <i class="ti ti-search"></i>
+              <input type="text" id="ac-busca" placeholder="Buscar acionista por nome ou documento..." autocomplete="off">
+            </div>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Exercício</label>
+            <select class="filter-select" id="ac-ano"><option value="">Todos</option></select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Tipo de pessoa</label>
+            <select class="filter-select" id="ac-tipo">
+              <option value="">Todos</option>
+              <option value="PF">Pessoa Física</option>
+              <option value="PJ">Pessoa Jurídica</option>
+            </select>
+          </div>
+          <div class="field-inline">
+            <label style="text-transform:none;letter-spacing:0;font-weight:500;">Mín. de empresas</label>
+            <select class="filter-select" id="ac-min">
+              <option value="2">2 ou mais</option>
+              <option value="3">3 ou mais</option>
+              <option value="4">4 ou mais</option>
+              <option value="5">5 ou mais</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-ac-analisar"><i class="ti ti-affiliate"></i> Cruzar</button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid" id="ac-kpis"></div>
+
+        <!-- Gráficos -->
+        <div class="chart-grid" id="ac-charts"></div>
+
+        <!-- Ranking + conexões -->
+        <div id="ac-body" class="app-hidden"></div>
+
+        <!-- Estado vazio / carregando -->
+        <div class="dre-empty" id="ac-empty">
+          <i class="ti ti-affiliate dre-empty-icon"></i>
+          <div id="ac-empty-msg">Carregando cruzamento de acionistas...</div>
+        </div>
       </section>
 
       <!-- ===== IMPORTAÇÃO DE MODELOS ===== -->
@@ -1319,8 +1460,10 @@ function switchView(view) {
   if (view === 'dre') loadDre();
   if (view === 'itr') loadItr();
   if (view === 'bpa') loadBpa();
+  if (view === 'bpp') loadBpp();
   if (view === 'comparativo') loadComparativo();
   if (view === 'composicao') loadComposicao();
+  if (view === 'acionistas') loadAcionistas();
 }
 
 /* ---------- crédito ---------- */
@@ -1935,15 +2078,15 @@ function dossieDestruirCharts() {
 
 function dossieFmtTick(v) { return Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 }); }
 
-function dossieCriarGrafico(canvas, serie) {
+function dossieCriarGrafico(canvas, serie, store) {
   if (typeof Chart === 'undefined') return;
-  if (serie.tipo === 'donut') return dossieDonut(canvas, serie);
-  if (serie.tipo === 'barras_empilhadas') return dossieBarras(canvas, serie, { stacked: true });
-  if (serie.tipo === 'barras_horizontais') return dossieBarras(canvas, serie, { horizontal: true });
-  return dossieBarras(canvas, serie, {});
+  if (serie.tipo === 'donut') return dossieDonut(canvas, serie, store);
+  if (serie.tipo === 'barras_empilhadas') return dossieBarras(canvas, serie, { stacked: true }, store);
+  if (serie.tipo === 'barras_horizontais') return dossieBarras(canvas, serie, { horizontal: true }, store);
+  return dossieBarras(canvas, serie, {}, store);
 }
 
-function dossieDonut(canvas, serie) {
+function dossieDonut(canvas, serie, store) {
   const dados = ((serie.valores[0] && serie.valores[0].dados) || []).map(v => Number(v || 0));
   const chart = new Chart(canvas, {
     type: 'doughnut',
@@ -1956,10 +2099,10 @@ function dossieDonut(canvas, serie) {
       },
     },
   });
-  compState.charts.push(chart);
+  (store || compState.charts).push(chart);
 }
 
-function dossieBarras(canvas, serie, opts) {
+function dossieBarras(canvas, serie, opts, store) {
   const horizontal = !!opts.horizontal, stacked = !!opts.stacked;
   const datasets = (serie.valores || []).map((v, i) => ({
     label: v.rotulo,
@@ -1984,7 +2127,7 @@ function dossieBarras(canvas, serie, opts) {
       },
     },
   });
-  compState.charts.push(chart);
+  (store || compState.charts).push(chart);
 }
 
 /* ---------- tabelas detalhadas (reuso de /modelo/{modelo}) ---------- */
@@ -2041,6 +2184,293 @@ function compMostrarVazio(html) {
   const empty = document.getElementById('comp-empty');
   empty.style.display = 'block';
   empty.innerHTML = html;
+}
+
+/* ---------- acionistas cruzados (cruzamento FRE entre companhias) ---------- */
+const acState = { inited: false, mode: 'entrada', insights: null, tables: {}, charts: [], expanded: null };
+
+function loadAcionistas() {
+  if (!acState.inited) {
+    acState.inited = true;
+
+    // Exercícios: "Todos" (snapshot por empresa) + anos recentes; o filtro é tolerante a anos sem dados.
+    const selAno = document.getElementById('ac-ano');
+    const atual = new Date().getFullYear();
+    let opts = '<option value="">Todos</option>';
+    for (let a = atual; a >= 2012; a--) opts += `<option value="${a}">${a}</option>`;
+    selAno.innerHTML = opts;
+
+    // A consulta de cruzamento (ranking filtrado) roda SOMENTE ao acionar "Cruzar"
+    // (botão ou Enter na busca); os filtros não disparam mais a consulta automaticamente.
+    document.getElementById('btn-ac-analisar').addEventListener('click', acAnalisar);
+    document.getElementById('ac-busca').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); acAnalisar(); }
+    });
+  }
+  // Na entrada do formulário: carrega o overview (Top 10 PF e Top 10 PJ).
+  acCarregarEntrada();
+}
+
+function acDestruirCharts() {
+  (acState.charts || []).forEach(c => { try { c.destroy(); } catch {} });
+  acState.charts = [];
+}
+
+function acFiltros() {
+  return {
+    ano: document.getElementById('ac-ano').value,
+    tipoPessoa: document.getElementById('ac-tipo').value,
+    minEmpresas: document.getElementById('ac-min').value || '2',
+    busca: document.getElementById('ac-busca').value.trim(),
+  };
+}
+
+async function acFetchInsights(ano) {
+  const qs = new URLSearchParams();
+  if (ano) qs.set('ano', ano);
+  try {
+    const res = await authFetch('api/acionistas/insights' + (qs.toString() ? '?' + qs.toString() : ''));
+    return res.ok ? await res.json() : { kpis: [], series: [], pares: [] };
+  } catch { return { kpis: [], series: [], pares: [] }; }
+}
+
+async function acFetchRanking(params) {
+  const qs = new URLSearchParams();
+  if (params.ano) qs.set('ano', params.ano);
+  if (params.tipoPessoa) qs.set('tipoPessoa', params.tipoPessoa);
+  qs.set('minEmpresas', params.minEmpresas || '2');
+  if (params.busca) qs.set('busca', params.busca);
+  qs.set('limite', String(params.limite || 50));
+  const res = await authFetch('api/acionistas/ranking?' + qs.toString());
+  if (!res.ok) {
+    const d = await parseJson(res);
+    throw new Error((d && d.message) || 'Falha ao cruzar os acionistas.');
+  }
+  return await res.json();
+}
+
+function acIniciarCarga(msg) {
+  acDestruirCharts();
+  acState.expanded = null;
+  document.getElementById('ac-empty').style.display = 'block';
+  document.getElementById('ac-empty-msg').innerHTML = `<i class="ti ti-loader-2 spin"></i> ${msg}`;
+  document.getElementById('ac-body').classList.add('app-hidden');
+  document.getElementById('ac-kpis').innerHTML = '';
+  document.getElementById('ac-charts').innerHTML = '';
+}
+
+function acMostrarBody() {
+  document.getElementById('ac-empty').style.display = 'none';
+  document.getElementById('ac-body').classList.remove('app-hidden');
+  acRenderBody();
+}
+
+function acVazio(msg) {
+  document.getElementById('ac-empty').style.display = 'block';
+  document.getElementById('ac-empty-msg').innerHTML = msg;
+}
+
+// Entrada do formulário: Top 10 cruzamentos PF + Top 10 PJ (sem depender dos filtros/botão).
+async function acCarregarEntrada() {
+  const ano = document.getElementById('ac-ano').value;
+  acIniciarCarga('Carregando cruzamentos de acionistas...');
+  try {
+    const [insights, pf, pj] = await Promise.all([
+      acFetchInsights(ano),
+      acFetchRanking({ ano, tipoPessoa: 'PF', minEmpresas: '2', limite: 10 }),
+      acFetchRanking({ ano, tipoPessoa: 'PJ', minEmpresas: '2', limite: 10 }),
+    ]);
+    acState.insights = insights;
+    acState.mode = 'entrada';
+    acState.tables = { pf, pj };
+    acRenderKpis(insights);
+    acRenderCharts(insights);
+    if (!pf.length && !pj.length) {
+      acVazio('<i class="ti ti-mood-empty"></i> Nenhum acionista cruzado encontrado. Importe posições acionárias (FRE) de mais companhias para ampliar o cruzamento.');
+      return;
+    }
+    acMostrarBody();
+  } catch (e) {
+    acVazio(`<i class="ti ti-alert-triangle"></i> ${e.message || 'Falha ao carregar os cruzamentos.'}`);
+  }
+}
+
+// Acionado apenas pelo botão "Cruzar" (ou Enter na busca): ranking filtrado completo.
+async function acAnalisar() {
+  const f = acFiltros();
+  acIniciarCarga('Cruzando posições acionárias...');
+  try {
+    const [insights, ranking] = await Promise.all([
+      acFetchInsights(f.ano),
+      acFetchRanking({ ano: f.ano, tipoPessoa: f.tipoPessoa, minEmpresas: f.minEmpresas, busca: f.busca, limite: 50 }),
+    ]);
+    acState.insights = insights;
+    acState.mode = 'ranking';
+    acState.tables = { rank: ranking };
+    acRenderKpis(insights);
+    acRenderCharts(insights);
+    if (!ranking.length) {
+      acVazio('<i class="ti ti-mood-empty"></i> Nenhum acionista cruzado para os filtros selecionados.');
+      return;
+    }
+    acMostrarBody();
+  } catch (e) {
+    acVazio(`<i class="ti ti-alert-triangle"></i> ${e.message || 'Falha ao cruzar os acionistas.'}`);
+  }
+}
+
+function acRenderKpis(insights) {
+  const kpis = (insights && insights.kpis) || [];
+  document.getElementById('ac-kpis').innerHTML = kpis.map(k =>
+    `<div class="kpi-card"><div class="kpi-label"><i class="ti ti-${k.icone || 'point'}"></i> ${compEsc(k.rotulo)}</div><div class="kpi-value">${dossieFmtKpi(k)}</div></div>`).join('');
+}
+
+function acRenderCharts(insights) {
+  const grid = document.getElementById('ac-charts');
+  const series = (((insights && insights.series) || []).filter(dossieSerieTemDados));
+  if (!series.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = series.map((s, i) => {
+    const wide = s.tipo !== 'donut' && (s.categorias || []).length > 4;
+    return `<div class="chart-card${wide ? ' wide' : ''}"><h4>${compEsc(s.titulo)}</h4><div class="chart-canvas-wrap"><canvas id="ac-canvas-${i}"></canvas></div></div>`;
+  }).join('');
+  series.forEach((s, i) => {
+    const cv = document.getElementById('ac-canvas-' + i);
+    if (cv) dossieCriarGrafico(cv, s, acState.charts);
+  });
+}
+
+function acTipoLabel(t) {
+  if (t === 'PF') return '<span class="badge badge-neutral">Pessoa Física</span>';
+  if (t === 'PJ') return '<span class="badge badge-neutral">Pessoa Jurídica</span>';
+  return `<span class="badge badge-neutral">${compEsc(t || '—')}</span>`;
+}
+
+function acRenderBody() {
+  const pares = (acState.insights && acState.insights.pares) || [];
+  let h = '';
+  let comNome = [];
+
+  if (acState.mode === 'entrada') {
+    const pf = acState.tables.pf || [];
+    const pj = acState.tables.pj || [];
+    h += acTabelaRankingHTML('Top 10 cruzamentos — Pessoas Físicas', 'ti-user', 'pf', pf);
+    h += acTabelaRankingHTML('Top 10 cruzamentos — Pessoas Jurídicas', 'ti-building-bank', 'pj', pj, '16px');
+    comNome = pf.concat(pj);
+  } else {
+    const rank = acState.tables.rank || [];
+    h += acTabelaRankingHTML('Ranking de acionistas cruzados', 'ti-trophy', 'rank', rank);
+    comNome = rank;
+  }
+
+  // Pares de empresas com acionistas em comum (rede de conexões como tabela).
+  if (pares.length) {
+    h += '<div class="table-card" style="margin-top:16px;"><div class="table-header"><div class="table-title"><i class="ti ti-share"></i> Empresas conectadas por acionistas em comum</div>'
+       + `<div class="table-count">${pares.length} par(es)</div></div>`
+       + '<div class="table-wrap"><table class="dre-table"><thead><tr>'
+       + '<th>Empresa A</th><th>Empresa B</th><th class="col-num">Sócios em comum</th>'
+       + '</tr></thead><tbody>';
+    h += pares.map(p =>
+      `<tr><td>${compEsc(p.empresaA || formatDoc(p.cnpjNumA))}</td><td>${compEsc(p.empresaB || formatDoc(p.cnpjNumB))}</td>`
+      + `<td style="text-align:right;font-family:'DM Mono',monospace;">${compFmtQtd(p.qtdSociosComum)}</td></tr>`).join('');
+    h += '</tbody></table></div></div>';
+  }
+
+  // Aviso quando há cruzamento aproximado (chave por nome, sem documento).
+  if (comNome.some(r => r.chavePorNome)) {
+    h += '<div class="dossie-empty-mini" style="margin-top:12px;"><i class="ti ti-info-circle"></i> '
+       + 'Acionistas marcados com (~) foram cruzados por nome (sem CPF/CNPJ preenchido na origem); esse cruzamento é aproximado.</div>';
+  }
+
+  document.getElementById('ac-body').innerHTML = h;
+
+  document.querySelectorAll('#ac-body tr.ac-row').forEach(el =>
+    el.addEventListener('click', () => acToggleDetalhe(el.dataset.table, +el.dataset.i)));
+
+  // Preenche o detalhe expandido (se houver) após o render.
+  if (acState.expanded) {
+    const sep = acState.expanded.lastIndexOf(':');
+    acFillDetalhe(acState.expanded.slice(0, sep), +acState.expanded.slice(sep + 1));
+  }
+}
+
+function acTabelaRankingHTML(titulo, icon, tableKey, rows, marginTop) {
+  const style = marginTop ? ` style="margin-top:${marginTop};"` : '';
+  let h = `<div class="table-card"${style}><div class="table-header"><div class="table-title"><i class="ti ${icon}"></i> ${titulo}</div>`
+    + `<div class="table-count">${rows.length} acionista(s)</div></div>`
+    + '<div class="table-wrap"><table class="dre-table"><thead><tr>'
+    + '<th style="width:32px;"></th><th>Acionista</th><th>Tipo</th><th class="col-num">Empresas</th>'
+    + '<th class="col-num">% Médio</th><th class="col-num">% Máximo</th><th>Controlador</th>'
+    + '</tr></thead><tbody>';
+  if (!rows.length) {
+    h += '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:18px;">Nenhum acionista cruzado.</td></tr>';
+  } else {
+    h += rows.map((r, i) => acLinhaRanking(r, tableKey, i)).join('');
+  }
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+function acLinhaRanking(r, tableKey, i) {
+  const nome = compEsc(r.nome || '—') + (r.chavePorNome ? ' <span title="Cruzado por nome (aproximado)" style="color:var(--text-muted);">(~)</span>' : '');
+  const doc = r.documento ? `<div class="dre-ac-meta">${formatDoc(r.documento)}</div>` : '';
+  const aberto = acState.expanded === `${tableKey}:${i}`;
+  let h = `<tr class="ac-row" data-table="${tableKey}" data-i="${i}" style="cursor:pointer;">`
+    + `<td style="text-align:center;color:var(--text-muted);"><i class="ti ti-chevron-${aberto ? 'down' : 'right'}"></i></td>`
+    + `<td><div style="font-weight:600;">${nome}</div>${doc}</td>`
+    + `<td>${acTipoLabel(r.tipoPessoa)}</td>`
+    + `<td style="text-align:right;font-family:'DM Mono',monospace;font-weight:600;">${compFmtQtd(r.qtdEmpresas)}</td>`
+    + `<td style="text-align:right;font-family:'DM Mono',monospace;">${compFmtPct(r.percentualMedio)}</td>`
+    + `<td style="text-align:right;font-family:'DM Mono',monospace;">${compFmtPct(r.percentualMaximo)}</td>`
+    + `<td>${r.controlador ? '<span class="badge badge-success">Controlador</span>' : '<span class="badge badge-neutral">—</span>'}</td>`
+    + '</tr>';
+  if (aberto) {
+    h += `<tr class="ac-detalhe"><td colspan="7" style="background:rgba(0,30,97,0.02);padding:0;"><div id="ac-detalhe-${tableKey}-${i}" style="padding:10px 14px;">`
+      + '<div class="dossie-empty-mini"><i class="ti ti-loader-2 spin"></i> Carregando empresas...</div></div></td></tr>';
+  }
+  return h;
+}
+
+function acToggleDetalhe(tableKey, i) {
+  const id = `${tableKey}:${i}`;
+  acState.expanded = acState.expanded === id ? null : id;
+  acRenderBody();
+}
+
+async function acFillDetalhe(tableKey, i) {
+  const cont = document.getElementById(`ac-detalhe-${tableKey}-${i}`);
+  if (!cont) return;
+  const item = (acState.tables[tableKey] || [])[i];
+  if (!item) return;
+
+  let empresas = item.empresas;
+  // Drilldown via endpoint dedicado quando a chave é um documento (sem barras, seguro na rota).
+  if ((!empresas || !empresas.length) && item.chave && !item.chave.includes('/')) {
+    try {
+      const ano = document.getElementById('ac-ano').value;
+      const qs = ano ? ('?ano=' + encodeURIComponent(ano)) : '';
+      const res = await authFetch(`api/acionistas/${encodeURIComponent(item.chave)}/posicoes${qs}`);
+      if (res.ok) { const d = await res.json(); empresas = d.empresas || []; }
+    } catch { /* mantém fallback inline abaixo */ }
+  }
+  empresas = empresas || [];
+
+  if (!empresas.length) {
+    cont.innerHTML = '<div class="dossie-empty-mini">Sem empresas para detalhar.</div>';
+    return;
+  }
+
+  cont.innerHTML = '<div class="table-wrap"><table class="dre-table"><thead><tr>'
+    + '<th>Companhia</th><th class="col-num">Exercício</th><th class="col-num">% ON</th>'
+    + '<th class="col-num">% PN</th><th class="col-num">% Total</th><th>Controlador</th>'
+    + '</tr></thead><tbody>'
+    + empresas.map(e =>
+        `<tr><td>${compEsc(e.nomeCompanhia || formatDoc(e.cnpjNum))}<div class="dre-ac-meta">${formatDoc(e.cnpjNum)}</div></td>`
+        + `<td style="text-align:right;font-family:'DM Mono',monospace;">${e.ano || '—'}${e.versao != null ? (' · v' + e.versao) : ''}</td>`
+        + `<td style="text-align:right;font-family:'DM Mono',monospace;">${compFmtPct(e.percentualOrdinarias)}</td>`
+        + `<td style="text-align:right;font-family:'DM Mono',monospace;">${compFmtPct(e.percentualPreferenciais)}</td>`
+        + `<td style="text-align:right;font-family:'DM Mono',monospace;font-weight:600;">${compFmtPct(e.percentualTotal)}</td>`
+        + `<td>${e.controlador ? '<span class="badge badge-success">Sim</span>' : '<span class="badge badge-neutral">—</span>'}</td></tr>`).join('')
+    + '</tbody></table></div>';
 }
 
 /* ---------- importação de modelos ---------- */
@@ -3382,6 +3812,350 @@ function bpaExportCsv() {
   const periodo = m.periodo.label.replace(/\D+/g, '');
   const conj = document.getElementById('bpa-conjunto').value;
   a.download = `bpa-${nome}-${periodo}-${conj}.csv`;
+  a.click();
+}
+
+/* ============================================================
+   LEITURA DE BALANCO PATRIMONIAL PASSIVO (BPP)
+   Mesma mecanica do BPA, porem a base da analise vertical e o
+   Passivo Total (CD '2' = Passivo + Patrimonio Liquido) e consome
+   api/dfp/{cnpj}/contas?tipo=BPP. Reaproveita helpers globais e
+   bpaFmtData/dreParseISO da tela de Balanco Ativo.
+   ============================================================ */
+const bppState = {
+  inited: false,
+  empresa: null,
+  rows: [],
+  conjuntosDisp: [],
+  anosDisp: [],
+  periodos: [],
+  periodoKey: null,
+  modelo: null,
+};
+let bppBuscaTimer = null;
+let bppAcItems = [];
+let bppAcActive = -1;
+
+/* ---------- carregamento ---------- */
+async function loadBpp() {
+  if (bppState.inited) return;
+  bppState.inited = true;
+  bppBindEvents();
+}
+
+function bppBindEvents() {
+  const busca = document.getElementById('bpp-busca');
+  busca.addEventListener('input', () => {
+    clearTimeout(bppBuscaTimer);
+    const q = busca.value.trim();
+    if (q.length < 2) { bppFecharAutocomplete(); return; }
+    bppBuscaTimer = setTimeout(() => bppBuscarEmpresas(q), 280);
+  });
+  busca.addEventListener('keydown', bppAcKeydown);
+  busca.addEventListener('focus', () => { if (bppAcItems.length) document.getElementById('bpp-autocomplete').classList.add('open'); });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#view-bpp .dre-search')) bppFecharAutocomplete();
+  });
+  document.getElementById('bpp-conjunto').addEventListener('change', () => { bppState.periodoKey = null; bppRender(); });
+  document.getElementById('bpp-ano').addEventListener('change', () => { bppState.periodoKey = null; bppRender(); });
+  document.getElementById('bpp-periodo').addEventListener('change', (e) => { bppState.periodoKey = e.target.value; bppRender(); });
+  document.getElementById('btn-bpp-analisar').addEventListener('click', bppAnalisar);
+  document.getElementById('btn-bpp-export').addEventListener('click', bppExportCsv);
+}
+
+/* ---------- autocomplete de companhia ---------- */
+async function bppBuscarEmpresas(q) {
+  const box = document.getElementById('bpp-autocomplete');
+  box.classList.add('open');
+  box.innerHTML = '<div class="dre-ac-empty"><i class="ti ti-loader-2 spin"></i> Buscando...</div>';
+  try {
+    const res = await authFetch('api/dfp/empresas?limite=20&busca=' + encodeURIComponent(q));
+    if (!res.ok) { box.innerHTML = '<div class="dre-ac-empty">Não foi possível buscar companhias.</div>'; return; }
+    const list = await res.json();
+    bppAcItems = Array.isArray(list) ? list : [];
+    bppAcActive = -1;
+    if (!bppAcItems.length) { box.innerHTML = '<div class="dre-ac-empty">Nenhuma companhia encontrada.</div>'; return; }
+    box.innerHTML = bppAcItems.map((e, i) => `
+      <div class="dre-ac-item" data-i="${i}">
+        <div class="dre-ac-name">${(e.denominacao || '—')}</div>
+        <div class="dre-ac-meta">${formatDoc(e.cnpj || e.cnpjNum)} · CVM ${e.cdCvm || '—'} · ${e.qtdAnos} ano(s) · até ${e.ultimoAno || '—'}</div>
+      </div>`).join('');
+    box.querySelectorAll('.dre-ac-item').forEach(el =>
+      el.addEventListener('click', () => bppSelecionarEmpresa(bppAcItems[parseInt(el.dataset.i, 10)])));
+  } catch {
+    box.innerHTML = '<div class="dre-ac-empty">Falha de conexão na busca.</div>';
+  }
+}
+function bppAcKeydown(e) {
+  const box = document.getElementById('bpp-autocomplete');
+  if (!box.classList.contains('open') || !bppAcItems.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    bppAcActive += e.key === 'ArrowDown' ? 1 : -1;
+    if (bppAcActive < 0) bppAcActive = bppAcItems.length - 1;
+    if (bppAcActive >= bppAcItems.length) bppAcActive = 0;
+    box.querySelectorAll('.dre-ac-item').forEach((el, i) => el.classList.toggle('active', i === bppAcActive));
+  } else if (e.key === 'Enter') {
+    if (bppAcActive >= 0) { e.preventDefault(); bppSelecionarEmpresa(bppAcItems[bppAcActive]); }
+  } else if (e.key === 'Escape') {
+    bppFecharAutocomplete();
+  }
+}
+function bppFecharAutocomplete() { document.getElementById('bpp-autocomplete').classList.remove('open'); }
+
+function bppSelecionarEmpresa(emp) {
+  if (!emp) return;
+  bppState.empresa = emp;
+  document.getElementById('bpp-busca').value = emp.denominacao || emp.cnpjNum;
+  bppFecharAutocomplete();
+  document.getElementById('btn-bpp-analisar').disabled = false;
+  bppAnalisar();
+}
+
+/* ---------- análise: carrega contas e renderiza ---------- */
+async function bppAnalisar() {
+  if (!bppState.empresa) return;
+  const cnpj = bppState.empresa.cnpjNum;
+  const btn = document.getElementById('btn-bpp-analisar');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Analisando...';
+  bppMostrarVazio('<i class="ti ti-loader-2 spin dre-empty-icon"></i><div>Carregando balanço...</div>', true);
+  try {
+    const res = await authFetch('api/dfp/' + encodeURIComponent(cnpj) + '/contas?tipo=BPP');
+    if (!res.ok) {
+      const d = await parseJson(res);
+      bppMostrarVazio('<i class="ti ti-alert-triangle dre-empty-icon"></i><div>' + (d.message || 'Falha ao carregar o balanço.') + '</div>');
+      return;
+    }
+    const rows = await res.json();
+    bppState.rows = (Array.isArray(rows) ? rows : []).filter(r => r.cdConta);
+    if (!bppState.rows.length) {
+      bppMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Esta companhia não possui Balanço Passivo importado.</div>');
+      return;
+    }
+    bppState.conjuntosDisp = [...new Set(bppState.rows.map(r => (r.conjunto || '').toUpperCase()).filter(Boolean))];
+    bppState.anosDisp = [...new Set(bppState.rows.map(r => r.ano).filter(v => v != null))].sort((a, b) => b - a);
+    bppState.periodoKey = null;
+    bppPrepararFiltros();
+    bppRender();
+  } catch {
+    bppMostrarVazio('<i class="ti ti-plug-connected-x dre-empty-icon"></i><div>Sem conexão com o servidor.</div>');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-chart-bar"></i> Analisar';
+  }
+}
+
+function bppPrepararFiltros() {
+  const selAno = document.getElementById('bpp-ano');
+  selAno.innerHTML = bppState.anosDisp.map(a => `<option value="${a}">${a}</option>`).join('');
+  selAno.disabled = false;
+  const selConj = document.getElementById('bpp-conjunto');
+  selConj.disabled = false;
+  [...selConj.options].forEach(o => { o.disabled = !bppState.conjuntosDisp.includes(o.value); });
+  if (!bppState.conjuntosDisp.includes(selConj.value)) {
+    selConj.value = bppState.conjuntosDisp.includes('CON') ? 'CON' : (bppState.conjuntosDisp[0] || 'CON');
+  }
+}
+
+function bppMostrarVazio(html, manterCompany = false) {
+  document.getElementById('bpp-content').classList.add('app-hidden');
+  if (!manterCompany) document.getElementById('bpp-company').classList.remove('show');
+  const empty = document.getElementById('bpp-empty');
+  empty.style.display = 'block';
+  empty.innerHTML = html;
+  document.getElementById('btn-bpp-export').disabled = true;
+}
+
+/* ---------- modelo por data-base (conjunto, dtRefer, dtFimExerc) ---------- */
+/**
+ * Agrupa as linhas "ULTIMO" por data-base (conjunto, dtRefer, dtFimExerc),
+ * escolhe a maior versao por data-base e deduplica CD_CONTA. Identico ao BPA.
+ */
+function bppListarPeriodos(rows, conjunto) {
+  const base = rows.filter(r =>
+    (r.conjunto || '').toUpperCase() === conjunto &&
+    dreNorm(r.ordemExerc) === 'ultimo' && r.cdConta);
+  const grupos = new Map();
+  for (const r of base) {
+    const fim = dreParseISO(r.dtFimExerc);
+    if (!fim) continue;
+    const key = conjunto + '|' + (r.dtRefer || '') + '|' + (r.dtFimExerc || '');
+    let g = grupos.get(key);
+    if (!g) { g = { key, rows: [], fim, dtRefer: r.dtRefer }; grupos.set(key, g); }
+    g.rows.push(r);
+  }
+  const periodos = [];
+  for (const g of grupos.values()) {
+    const maxV = Math.max(...g.rows.map(r => r.versao || 0));
+    const vrows = g.rows.filter(r => (r.versao || 0) === maxV);
+    const meta = vrows[0];
+    const escala = dreEscala(meta.escalaMoeda);
+    const contaMap = new Map();
+    for (const r of vrows) contaMap.set(r.cdConta, { cd: r.cdConta, ds: r.dsConta, val: (r.vlConta || 0) * escala });
+    const contas = [...contaMap.values()];
+    const valMap = {};
+    contas.forEach(c => { valMap[c.cd] = c.val; });
+    const dataLabel = bpaFmtData(g.fim);
+    periodos.push({
+      key: g.key, dtRefer: g.dtRefer, fim: g.fim, ano: g.fim.y,
+      versao: maxV, meta, escala, contas, valMap, label: dataLabel, optLabel: dataLabel,
+    });
+  }
+  periodos.sort((a, b) => (a.fim.y * 10000 + a.fim.mo * 100 + a.fim.d) - (b.fim.y * 10000 + b.fim.mo * 100 + b.fim.d));
+  return periodos;
+}
+
+/**
+ * Monta o balanco passivo da data-base selecionada. AV% = valor / Passivo Total (CD '2').
+ */
+function bppBuildModel(conjunto, periodoKey) {
+  const todos = bppListarPeriodos(bppState.rows, conjunto);
+  if (!todos.length) return null;
+  const atual = todos.find(p => p.key === periodoKey) || todos[todos.length - 1];
+
+  const passivoTotal = atual.valMap.hasOwnProperty('2') ? atual.valMap['2'] : null;
+
+  const linhas = atual.contas.slice().sort((a, b) => dreCmpCd(a.cd, b.cd)).map(c => {
+    const at = c.val;
+    const av = (passivoTotal && passivoTotal !== 0) ? (at / Math.abs(passivoTotal)) * 100 : null;
+    const nivel = dreNivel(c.cd);
+    const tipo = nivel === 1 ? 'total' : nivel === 2 ? 'subtotal' : '';
+    return {
+      cd: c.cd, nivel,
+      ds: c.ds || c.cd,
+      tipo,
+      atual: at, av,
+    };
+  });
+
+  return {
+    escala: atual.escala, meta: atual.meta, versao: atual.versao,
+    periodo: atual, passivoTotal, linhas,
+  };
+}
+
+/* ---------- render principal ---------- */
+function bppRender() {
+  if (!bppState.rows.length) return;
+  const conjunto = document.getElementById('bpp-conjunto').value;
+  const todos = bppListarPeriodos(bppState.rows, conjunto);
+  bppState.periodos = todos;
+  if (!todos.length) {
+    bppMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados de Balanço Passivo para ' + (conjunto === 'CON' ? 'Consolidado' : 'Individual') + '.</div>', true);
+    return;
+  }
+
+  const anos = [...new Set(todos.map(p => p.ano))].sort((a, b) => b - a);
+  const selAno = document.getElementById('bpp-ano');
+  let ano = parseInt(selAno.value, 10);
+  if (!anos.includes(ano)) { ano = anos[0]; }
+  const optsAtual = [...selAno.options].map(o => o.value).join(',');
+  if (optsAtual !== anos.join(',')) {
+    selAno.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
+  selAno.value = ano;
+  selAno.disabled = false;
+
+  // datas-base do exercicio selecionado
+  const doAno = todos.filter(p => p.ano === ano)
+    .sort((a, b) => (b.fim.mo - a.fim.mo) || (b.fim.d - a.fim.d));
+  const selPer = document.getElementById('bpp-periodo');
+  selPer.innerHTML = doAno.map(p => `<option value="${p.key}">${p.optLabel}</option>`).join('');
+  selPer.disabled = !doAno.length;
+
+  let periodoKey = bppState.periodoKey;
+  if (!doAno.some(p => p.key === periodoKey)) periodoKey = doAno.length ? doAno[0].key : null;
+  bppState.periodoKey = periodoKey;
+  selPer.value = periodoKey || '';
+
+  const model = bppBuildModel(conjunto, periodoKey);
+  bppState.modelo = model;
+  if (!model) {
+    bppMostrarVazio('<i class="ti ti-mood-empty dre-empty-icon"></i><div>Sem dados de Balanço Passivo para a data-base selecionada.</div>', true);
+    return;
+  }
+
+  document.getElementById('bpp-empty').style.display = 'none';
+  document.getElementById('bpp-content').classList.remove('app-hidden');
+  document.getElementById('btn-bpp-export').disabled = false;
+  bppRenderCompany(model, conjunto);
+  bppRenderTabela(model);
+}
+
+function bppRenderCompany(model, conjunto) {
+  const card = document.getElementById('bpp-company');
+  card.classList.add('show');
+  const e = bppState.empresa;
+  const p = model.periodo;
+  document.getElementById('bpp-co-name').textContent = model.meta.denominacao || e.denominacao || '—';
+  document.getElementById('bpp-co-cnpj').textContent = formatDoc(model.meta.cnpj || e.cnpjNum);
+  document.getElementById('bpp-co-cvm').textContent = model.meta.cdCvm || e.cdCvm || '—';
+  document.getElementById('bpp-co-ano').textContent = p.label;
+  document.getElementById('bpp-co-conjunto').textContent = conjunto === 'CON' ? 'Consolidado' : 'Individual';
+  const escalaTxt = model.escala >= 1e6 ? 'milhões' : model.escala >= 1e3 ? 'milhares' : 'unidade';
+  document.getElementById('bpp-co-moeda').textContent = (model.meta.moeda || 'R$') + ' · ' + escalaTxt;
+  document.getElementById('bpp-co-versao').textContent = 'v' + model.versao;
+}
+
+function bppRenderTabela(model) {
+  const body = document.getElementById('bpp-body');
+  document.getElementById('bpp-table-count').textContent =
+    `${model.linhas.length} linha(s) · data-base ${model.periodo.label}`;
+  document.getElementById('bpp-th-atual').textContent = model.periodo.label;
+
+  body.innerHTML = model.linhas.map((l) => {
+    const indent = (l.nivel - 1) * 16;
+    const temFilho = model.linhas.some(o => o.cd !== l.cd && o.cd.startsWith(l.cd + '.'));
+    const rowCls = l.tipo === 'total' ? 'total' : l.tipo === 'subtotal' ? 'subtotal' : '';
+    const grupoPai = l.nivel > 1 ? (l.cd.split('.').slice(0, -1).join('.')) : '';
+    const avHtml = l.av == null ? '—' : `<span class="dre-av">${dreFmtPct(l.av)}</span>`;
+    const toggle = temFilho
+      ? `<span class="dre-toggle" data-cd="${l.cd}"><i class="ti ti-chevron-down"></i></span>`
+      : '<span class="dre-toggle empty"></span>';
+    return `<tr class="dre-row dre-lvl-${l.nivel} ${rowCls}" data-cd="${l.cd}" data-pai="${grupoPai}">
+      <td>${toggle}</td>
+      <td class="dre-desc" style="padding-left:${14 + indent}px;" title="${(l.ds || '').replace(/"/g, '&quot;')}">${l.ds || l.cd}</td>
+      <td class="col-num">${dreFmtMoney(l.atual)}</td>
+      <td class="col-num">${avHtml}</td>
+    </tr>`;
+  }).join('');
+
+  body.querySelectorAll('.dre-toggle[data-cd]').forEach(tg =>
+    tg.addEventListener('click', () => bppToggleGrupo(tg)));
+}
+
+function bppToggleGrupo(tg) {
+  const cd = tg.dataset.cd;
+  const icon = tg.querySelector('i');
+  const colapsar = !tg.classList.contains('collapsed');
+  tg.classList.toggle('collapsed', colapsar);
+  icon.className = colapsar ? 'ti ti-chevron-right' : 'ti ti-chevron-down';
+  document.querySelectorAll('#bpp-body .dre-row').forEach(row => {
+    if (row.dataset.cd !== cd && row.dataset.cd.startsWith(cd + '.')) {
+      row.classList.toggle('collapsed-child', colapsar);
+    }
+  });
+}
+
+/* ---------- export CSV ---------- */
+function bppExportCsv() {
+  const m = bppState.modelo;
+  if (!m || !m.linhas.length) { toast('Nada para exportar.', true); return; }
+  const head = ['CD_CONTA', 'Descricao', 'Valor', 'AV%'];
+  const linhas = m.linhas.map(l => [
+    l.cd, l.ds,
+    (l.atual ?? '').toString().replace('.', ','),
+    (l.av == null ? '' : l.av.toFixed(1).replace('.', ',')),
+  ]);
+  const csv = [head.join(';')].concat(
+    linhas.map(r => r.map(c => `"${(c ?? '').toString().replace(/"/g, '""')}"`).join(';'))
+  ).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = (bppState.empresa.denominacao || bppState.empresa.cnpjNum).replace(/[^\w]+/g, '-').slice(0, 40);
+  const periodo = m.periodo.label.replace(/\D+/g, '');
+  const conj = document.getElementById('bpp-conjunto').value;
+  a.download = `bpp-${nome}-${periodo}-${conj}.csv`;
   a.click();
 }
 
